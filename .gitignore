@@ -1,0 +1,69 @@
+# Visual Studio user and workspace files
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio build directories
+Debug/
+Release/
+packages/
+x64/
+x86/
+ARM/
+ARM64/
+[Bb]in/
+[Oo]bj/
+
+# Makefile build output
+build/
+out/
+
+# Compiled C/C++ files
+*.obj
+*.o
+*.lo
+*.pch
+*.gch
+*.idb
+*.pdb
+*.ilk
+*.ipdb
+*.iobj
+
+# Libraries and executables
+*.lib
+*.a
+*.dll
+*.so
+*.dylib
+*.exe
+*.out
+
+# Visual Studio test output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Google Test generated files
+test_detail.xml
+
+# NuGet packages restored during build
+packages/
+*.nupkg
+
+# Generated prediction files
+binaryOutput.csv
+linearOutput.csv
+
+# Log and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*~
+.DS_Store
+Thumbs.db

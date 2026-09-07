@@ -1,0 +1,84 @@
+#pragma once
+
+#include <iostream>
+#include <ostream>
+#include <sstream>
+#include <string_view>
+#include <utility>
+
+/**
+ * @brief Severity levels supported by Logger.
+ */
+enum class LogLevel {
+    Debug = 0,
+    Info,
+    Warning,
+    Error,
+    Critical
+};
+
+/**
+ * @brief Provides simple non-thread-safe stream-based logging.
+ */
+class Logger {
+private:
+    class LogEntry {
+    public:
+        LogEntry(Logger& logger, LogLevel level);
+
+        LogEntry(const LogEntry&) = delete;
+        LogEntry& operator=(const LogEntry&) = delete;
+
+        LogEntry(LogEntry&& other) noexcept;
+        LogEntry& operator=(LogEntry&& other) = delete;
+
+        ~LogEntry() noexcept;
+
+        template <typename Value>
+        LogEntry& operator<<(const Value& value) {
+            if (true == enabled_) {
+                stream_ << value;
+            }
+
+            return *this;
+        }
+
+    private:
+        Logger* logger_;
+        LogLevel level_;
+        bool enabled_;
+        std::ostringstream stream_;
+    };
+
+public:
+    explicit Logger(
+        LogLevel minimumLevel = LogLevel::Info,
+        std::ostream& output = std::clog);
+
+    [[nodiscard]]
+    LogEntry debug();
+
+    [[nodiscard]]
+    LogEntry info();
+
+    [[nodiscard]]
+    LogEntry warning();
+
+    [[nodiscard]]
+    LogEntry error();
+
+    [[nodiscard]]
+    LogEntry critical();
+
+    void log(LogLevel level, std::string_view message);
+
+private:
+    [[nodiscard]]
+    bool isEnabled(LogLevel level) const noexcept;
+
+    [[nodiscard]]
+    static std::string_view levelName(LogLevel level) noexcept;
+
+    LogLevel minimumLevel;
+    std::ostream* output;
+};

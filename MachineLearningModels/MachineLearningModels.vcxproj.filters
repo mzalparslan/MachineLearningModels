@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\models">
+      <UniqueIdentifier>{a3ff844a-fb7c-4fa8-a02b-d56dcda1c364}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\preprocessing">
+      <UniqueIdentifier>{b2380e43-7308-4163-b144-47a2bf7368f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\optimization">
+      <UniqueIdentifier>{960636aa-d462-4161-83f9-87368c3e7db5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metrics">
+      <UniqueIdentifier>{99760a36-50f8-460c-bfd8-a93b1a55ced9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data">
+      <UniqueIdentifier>{4e01887b-948a-4ac9-b30c-f013d271bdfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pipelines">
+      <UniqueIdentifier>{1747b2e4-566a-4bc8-829c-e702b90264a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utilities">
+      <UniqueIdentifier>{901b6af9-a7db-4606-a786-b68c5adad5b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utilities">
+      <UniqueIdentifier>{6812027b-a2c2-4fe5-be66-a9bbde806145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metrics">
+      <UniqueIdentifier>{f1817d26-901c-43a7-ba0d-ebe258cccf15}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\data\BinaryClassificationWriter.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CsvDataLoader.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\DataPoint.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\DataSplitter.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\RegressionOutputWriter.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\metrics\BenchmarkTimer.h">
+      <Filter>Header Files\metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\metrics\metrics.h">
+      <Filter>Header Files\metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\metrics\ScopedBenchmarkTimer.h">
+      <Filter>Header Files\metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\IBinaryClassifier.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\IRegressionModel.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\LinearRegression.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\LogisticBinaryClassifier.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\ModelParameters.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optimization\BatchGradientDescent.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optimization\MiniBatchGradientDescent.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optimization\options.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optimization\StochasticGradientDescent.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pipelines\BinaryClassificationPipeline.h">
+      <Filter>Header Files\pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pipelines\RegressionPipeline.h">
+      <Filter>Header Files\pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\IScalingPolicy.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\MaxAbsoluteScaler.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\MeanNormScaler.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\MinMaxScaler.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\NoScaling.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\RobustScaler.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\preprocessing\ZScoreScaler.h">
+      <Filter>Header Files\preprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\utilities\Logger.h">
+      <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\utilities\Logger.cpp">
+      <Filter>Source Files\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metrics\BenchmarkTimer.cpp">
+      <Filter>Source Files\metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metrics\ScopedBenchmarkTimer.cpp">
+      <Filter>Source Files\metrics</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

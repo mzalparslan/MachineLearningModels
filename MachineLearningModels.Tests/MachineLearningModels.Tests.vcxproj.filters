@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="unit\data\CsvDataLoaderTests.cpp">
+      <Filter>unit\data</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\data\DataSplitterTests.cpp">
+      <Filter>unit\data</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\metrics\BenchmarkTimerTests.cpp">
+      <Filter>unit\metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\models\LinearRegressionTests.cpp">
+      <Filter>unit\models</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\models\LogisticBinaryClassifierTests.cpp">
+      <Filter>unit\models</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\optimization\BatchGradientDescentTests.cpp">
+      <Filter>unit\optimization</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\optimization\MiniBatchGradientDescentTests.cpp">
+      <Filter>unit\optimization</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\optimization\StochasticGradientDescentTests.cpp">
+      <Filter>unit\optimization</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\pipelines\BinaryClassificationPipelineTests.cpp">
+      <Filter>unit\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\pipelines\RegressionPipelineTests.cpp">
+      <Filter>unit\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\MaxAbsoluteScalerTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\MeanNormScalerTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\MinMaxScalerTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\NoScalingTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\RobustScalerTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\preprocessing\ZScoreScalerTests.cpp">
+      <Filter>unit\preprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\utilities\LoggerTests.cpp">
+      <Filter>unit\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\data\RegressionOutputWriterTests.cpp">
+      <Filter>unit\data</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\data\BinaryClassificationWriterTests.cpp">
+      <Filter>unit\data</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\metrics\ScopedBenchmarkTimerTests.cpp">
+      <Filter>unit\metrics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="unit">
+      <UniqueIdentifier>{3b22c995-a0d0-417a-8c97-a916040a677a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\data">
+      <UniqueIdentifier>{4af4dc61-290e-4928-9875-ed63f7bdb4dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\metrics">
+      <UniqueIdentifier>{b5314a9c-bf3e-4842-adb9-6c98abecdb3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\models">
+      <UniqueIdentifier>{6f2353de-2294-4afa-bae3-9b10e9d1ceb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\optimization">
+      <UniqueIdentifier>{d1736530-68f3-48e4-b322-486a1e580090}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\pipeline">
+      <UniqueIdentifier>{785c46fc-13cc-4ff7-9dc6-7a07645c79d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\preprocessing">
+      <UniqueIdentifier>{72a14495-b83b-4bea-b9f7-bee66cdcfa29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit\utilities">
+      <UniqueIdentifier>{b81b1d9d-ca55-471f-bab0-3d5382c71df7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

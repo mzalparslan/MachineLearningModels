@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{9eb27a4a-f194-49fa-8532-c86fd04ff486}</ProjectGuid>
+    <RootNamespace>MachineLearningModels</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)MachineLearningModels\include\;$(SolutionDir)MachineLearningModels\include\preprocessing;$(SolutionDir)MachineLearningModels\include\pipelines;$(SolutionDir)MachineLearningModels\include\optimization;$(SolutionDir)MachineLearningModels\include\models;$(SolutionDir)MachineLearningModels\include\metrics;$(SolutionDir)MachineLearningModels\include\data;$(SolutionDir)MachineLearningModels\include\utilities</IncludePath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)MachineLearningModels\include\;$(SolutionDir)MachineLearningModels\include\preprocessing;$(SolutionDir)MachineLearningModels\include\pipelines;$(SolutionDir)MachineLearningModels\include\optimization;$(SolutionDir)MachineLearningModels\include\models;$(SolutionDir)MachineLearningModels\include\metrics;$(SolutionDir)MachineLearningModels\include\data;$(SolutionDir)MachineLearningModels\include\utilities</IncludePath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)MachineLearningModels\include\;$(SolutionDir)MachineLearningModels\include\preprocessing;$(SolutionDir)MachineLearningModels\include\pipelines;$(SolutionDir)MachineLearningModels\include\optimization;$(SolutionDir)MachineLearningModels\include\models;$(SolutionDir)MachineLearningModels\include\metrics;$(SolutionDir)MachineLearningModels\include\data;$(SolutionDir)MachineLearningModels\include\utilities</IncludePath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)MachineLearningModels\include\;$(SolutionDir)MachineLearningModels\include\preprocessing;$(SolutionDir)MachineLearningModels\include\pipelines;$(SolutionDir)MachineLearningModels\include\optimization;$(SolutionDir)MachineLearningModels\include\models;$(SolutionDir)MachineLearningModels\include\metrics;$(SolutionDir)MachineLearningModels\include\data;$(SolutionDir)MachineLearningModels\include\utilities</IncludePath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\utilities;$(ProjectDir)include\preprocessing;$(ProjectDir)include\pipelines;$(ProjectDir)include\optimization;$(ProjectDir)include\models;$(ProjectDir)include\metrics;$(ProjectDir)include\data;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\utilities;$(ProjectDir)include\preprocessing;$(ProjectDir)include\pipelines;$(ProjectDir)include\optimization;$(ProjectDir)include\models;$(ProjectDir)include\metrics;$(ProjectDir)include\data;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\data\BinaryClassificationWriter.h" />
+    <ClInclude Include="include\data\CsvDataLoader.h" />
+    <ClInclude Include="include\data\DataPoint.h" />
+    <ClInclude Include="include\data\DataSplitter.h" />
+    <ClInclude Include="include\data\RegressionOutputWriter.h" />
+    <ClInclude Include="include\metrics\BenchmarkTimer.h" />
+    <ClInclude Include="include\metrics\metrics.h" />
+    <ClInclude Include="include\metrics\ScopedBenchmarkTimer.h" />
+    <ClInclude Include="include\models\IBinaryClassifier.h" />
+    <ClInclude Include="include\models\IRegressionModel.h" />
+    <ClInclude Include="include\models\LinearRegression.h" />
+    <ClInclude Include="include\models\LogisticBinaryClassifier.h" />
+    <ClInclude Include="include\models\ModelParameters.h" />
+    <ClInclude Include="include\optimization\BatchGradientDescent.h" />
+    <ClInclude Include="include\optimization\MiniBatchGradientDescent.h" />
+    <ClInclude Include="include\optimization\options.h" />
+    <ClInclude Include="include\optimization\StochasticGradientDescent.h" />
+    <ClInclude Include="include\pipelines\BinaryClassificationPipeline.h" />
+    <ClInclude Include="include\pipelines\RegressionPipeline.h" />
+    <ClInclude Include="include\preprocessing\IScalingPolicy.h" />
+    <ClInclude Include="include\preprocessing\MaxAbsoluteScaler.h" />
+    <ClInclude Include="include\preprocessing\MeanNormScaler.h" />
+    <ClInclude Include="include\preprocessing\MinMaxScaler.h" />
+    <ClInclude Include="include\preprocessing\NoScaling.h" />
+    <ClInclude Include="include\preprocessing\RobustScaler.h" />
+    <ClInclude Include="include\preprocessing\ZScoreScaler.h" />
+    <ClInclude Include="include\utilities\Logger.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\metrics\BenchmarkTimer.cpp" />
+    <ClCompile Include="src\metrics\ScopedBenchmarkTimer.cpp" />
+    <ClCompile Include="src\utilities\Logger.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
