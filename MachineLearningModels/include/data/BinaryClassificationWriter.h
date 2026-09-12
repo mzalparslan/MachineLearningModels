@@ -65,7 +65,7 @@ public:
             // Calculate the probability once to avoid scaling twice.
             const T probability = pipeline.predict(dataPoint.features);
 
-            const bool predictedClass = pipeline.predictClass(dataPoint.features);
+            const bool predictedClass = probability >= threshold;
 
             const bool expectedClass = dataPoint.target == T(1);
 

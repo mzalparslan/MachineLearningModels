@@ -12,7 +12,9 @@ TEST(BinaryClassificationPipelineTest, EndToEndPipeline) {
     options.learningRate = 0.1;
     options.epochs = 1500;
 
-    BinaryClassificationPipeline<double, NoScaling<double>, BatchGradientDescent<double>> pipeline(
+    BinaryClassificationPipeline<double, 
+        NoScaling<double>, 
+        BatchGradientDescent<double>> pipeline(
         scaler, optimizer, logger, options
     );
 
@@ -33,7 +35,9 @@ TEST(BinaryClassificationPipelineTest, PredictUnfittedThrows) {
     BatchGradientDescent<double> optimizer;
     GradientDescentOptions<double> options;
 
-    BinaryClassificationPipeline<double, NoScaling<double>, BatchGradientDescent<double>> pipeline(
+    BinaryClassificationPipeline<double, 
+        NoScaling<double>, 
+        BatchGradientDescent<double>> pipeline(
         scaler, optimizer, logger, options
     );
 
@@ -43,8 +47,13 @@ TEST(BinaryClassificationPipelineTest, PredictUnfittedThrows) {
 
 TEST(BinaryClassificationPipelineTest, FitDoesNotModifyCallersData) {
     Logger logger(LogLevel::Error);
-    BinaryClassificationPipeline<double, ZScoreScaler<double>, BatchGradientDescent<double>>
-        pipeline(ZScoreScaler<double>{}, BatchGradientDescent<double>{}, logger);
+    BinaryClassificationPipeline<double, 
+        ZScoreScaler<double>, 
+        BatchGradientDescent<double>> pipeline(
+        ZScoreScaler<double>{}, 
+        BatchGradientDescent<double>{}, 
+        logger
+    );
 
     std::vector<DataPoint<double>> data{
         { {1.0}, 0.0 },

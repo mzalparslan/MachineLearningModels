@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 /**
  * @brief Options for Gradient Descent optimization.

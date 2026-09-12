@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cmath>
+#include <algorithm>
 
 /**
  * @brief Metrics to evaluate regression model performance.
