@@ -67,3 +67,5 @@ linearOutput.csv
 *~
 .DS_Store
 Thumbs.db
+/MachineLearningModels.Examples/classification.csv
+/MachineLearningModels.Examples/lineardata.csv
