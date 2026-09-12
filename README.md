@@ -6,15 +6,32 @@ It demonstrates feature preprocessing, gradient-descent optimization, linear
 regression, logistic binary classification, data loading, evaluation output,
 and automated testing.
 
-The repository contains three projects:
+Repository contains four projects:
 
 - **MachineLearningModels** — reusable static library.
 - **MachineLearningModels.Examples** — example regression and classification runs.
 - **MachineLearningModels.Tests** — Google Test unit-test project.
+- **MachineLearningModels.Benchmarks** — performance comparisons of parallel and/or sequential execution strategies.
+
 
 ## Features
 
-### Feature scaling
+### Execution Strategies
+
+Linear-output calculations support configurable standard-library execution modes:
+
+- `std::inner_product`
+- Sequenced `std::transform_reduce`
+- Vectorized execution
+- Parallel execution
+- Parallel-vectorized execution
+
+Execution strategy can be selected when constructing a model. Sequential
+execution is generally preferable for ordinary feature vectors, while parallel
+execution may benefit unusually large vectors. Actual performance depends on
+the processor, compiler, and standard-library implementation.
+
+### Feature Scaling
 
 - Min-max scaling
 - Mean normalization
@@ -33,14 +50,14 @@ then reused to transform prediction and test data, preventing data leakage.
 - Stochastic gradient descent
 - Configurable learning rate, epoch count, L2 regularization, and bias regularization
 
-### Models and pipelines
+### Models and Pipelines
 
 - Multiple linear regression
 - Logistic binary classification
 - Regression pipeline combining a scaler, optimizer, and model
 - Binary-classification pipeline combining a scaler, optimizer, and model
 
-### Supporting components
+### Supporting Components
 
 - Numeric CSV dataset loader
 - Reproducible training/test splitting
@@ -48,6 +65,18 @@ then reused to transform prediction and test data, preventing data leakage.
 - Stream-style logger with configurable severity levels
 - Benchmark and scope-based benchmark timers
 - Unit tests for the main components
+
+## Performance benchmarks
+
+`MachineLearningModels.Benchmarks` compares the available linear-output
+execution strategies across different feature-vector sizes.
+
+Build and run it with Visual Studio using:
+
+```text
+Configuration: Release
+Platform: x64
+Debug → Start Without Debugging
 
 ## Requirements
 
@@ -140,7 +169,7 @@ utilities, output writers, logging, and benchmark timers.
 
 ```text
 MachineLearningModels/
-|-- MachineLearningModels/          # Static library
+|-- MachineLearningModels/            # Static library
 |   |-- include/
 |   |   |-- data/
 |   |   |-- metrics/
@@ -152,8 +181,8 @@ MachineLearningModels/
 |   |-- src/
 |   |   |-- metrics/
 |   |   `-- utilities/
-|-- MachineLearningModels.Examples/ # Example application
-|-- MachineLearningModels.Tests/    # Google Test suites
+|-- MachineLearningModels.Examples/   # Example application
+|-- MachineLearningModels.Tests/      # Google Test suites
 |   |-- unit/
 |   |   |-- data/
 |   |   |-- metrics/
@@ -162,9 +191,10 @@ MachineLearningModels/
 |   |   |-- pipelines/
 |   |   |-- preprocessing/
 |   |   `-- utilities/
-|-- resources/                      # Example CSV datasets
-|-- Makefile                        # Linux/WSL build
-`-- MachineLearningModels.sln       # Visual Studio solution
+|-- MachineLearningModels.Benchmarks/ # Performance benchmarks
+|-- resources/                        # Example CSV datasets
+|-- Makefile                          # Linux/WSL build
+`-- MachineLearningModels.sln         # Visual Studio solution
 ```
 
 ## Example design
