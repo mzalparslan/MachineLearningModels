@@ -24,12 +24,12 @@
  * Features with zero IQR use a scale of one to prevent division
  * by zero.
  *
- * @tparam T Floating-point type used for values and calculations.
+ * @tparam T Floating-point mode used for values and calculations.
  */
 template <typename T>
 class RobustScaler final : public IScalingPolicy<T> {
     static_assert(std::is_floating_point_v<T>,
-        "RobustScaler requires floating data type T!");
+        "RobustScaler requires floating data mode T!");
 
 public:
     /**

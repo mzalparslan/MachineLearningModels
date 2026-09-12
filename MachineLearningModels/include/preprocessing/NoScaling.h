@@ -12,12 +12,12 @@
  * This policy does not learn scaling parameters. Both fitting and
  * transformation are intentional no-op operations.
  *
- * @tparam T Feature value type.
+ * @tparam T Feature value mode.
  */
 template <typename T>
 class NoScaling final : public IScalingPolicy<T> {
     static_assert(std::is_floating_point_v<T>,
-        "NoScaling requires floating data type T!");
+        "NoScaling requires floating data mode T!");
 public:
     /**
      * @brief Performs no fitting because this policy has no parameters.

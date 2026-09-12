@@ -8,11 +8,22 @@
 
 class FakeBinaryClassificationPipeline {
 public:
+	FakeBinaryClassificationPipeline(double threshold_ = 0.5)
+		: threshold(threshold_) {
+	}
     [[nodiscard]]
-    double predictProbability(
+    double predict(
         const std::vector<double>& features) const {
         return features.front();
     }
+
+    [[nodiscard]]
+    bool predictClass (
+        const std::vector<double>& features) const {
+        return features.front() >= this->threshold;
+    }
+
+	double threshold;
 };
 
 TEST(BinaryClassificationWriterTests, WritesExpectedProbabilityPredictionAndCorrectness)
@@ -69,7 +80,7 @@ TEST(BinaryClassificationWriterTests, UsesSpecifiedClassificationThreshold)
         {{0.75}, 0.0}
     };
 
-    const FakeBinaryClassificationPipeline pipeline;
+    const FakeBinaryClassificationPipeline pipeline(0.8);
 
     BinaryClassificationWriter::writeCsv(
         outputPath,

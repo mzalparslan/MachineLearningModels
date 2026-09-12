@@ -25,12 +25,12 @@
  * Features containing only zeros during fitting use a scale of one
  * to prevent division by zero.
  *
- * @tparam T Floating-point data type used for values and calculations.
+ * @tparam T Floating-point data mode used for values and calculations.
  */
 template <typename T>
 class MaxAbsoluteScaler final : public IScalingPolicy<T> {
     static_assert(std::is_floating_point_v<T>,
-        "MaxAbsoluteScaler requires floating data type T!");
+        "MaxAbsoluteScaler requires floating data mode T!");
 
 public:
     /**

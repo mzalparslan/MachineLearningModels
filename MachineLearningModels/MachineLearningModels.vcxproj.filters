@@ -66,9 +66,6 @@
     <ClInclude Include="include\metrics\ScopedBenchmarkTimer.h">
       <Filter>Header Files\metrics</Filter>
     </ClInclude>
-    <ClInclude Include="include\models\IBinaryClassifier.h">
-      <Filter>Header Files\models</Filter>
-    </ClInclude>
     <ClInclude Include="include\models\IRegressionModel.h">
       <Filter>Header Files\models</Filter>
     </ClInclude>
@@ -122,6 +119,12 @@
     </ClInclude>
     <ClInclude Include="include\utilities\Logger.h">
       <Filter>Header Files\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\BaseRegressionModel.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\models\ExecutionStrategy.h">
+      <Filter>Header Files\models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

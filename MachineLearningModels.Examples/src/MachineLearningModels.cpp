@@ -18,12 +18,12 @@
 /**
  * @brief Loads, trains, and evaluates a binary-classification pipeline.
  *
- * @tparam T Floating-point type used for model calculations.
+ * @tparam T Floating-point mode used for model calculations.
  */
 template <typename T>
 void runBinaryClassification(Logger &logger) {
 	static_assert(std::is_floating_point_v<T>,
-		"runBinaryClassification requires floating point data type!");
+		"runBinaryClassification requires floating point data mode!");
 
 	const std::filesystem::path datasetPath = "classification.csv";
 
@@ -47,11 +47,11 @@ void runBinaryClassification(Logger &logger) {
 	Pipeline pipeline{
 		ZScoreScaler<T>{},
 		BatchGradientDescent<T>{},
+		logger,
 		GradientDescentOptions<T>{
 			.learningRate = T(0.01),
 			.epochs = 100
-		},
-		logger
+		}
 	};
 
 	pipeline.fit(dataSet.trainingData);
@@ -65,12 +65,12 @@ void runBinaryClassification(Logger &logger) {
 /**
  * @brief Loads, trains, and evaluates a linear regression model pipeline.
  *
- * @tparam T Floating-point type used for model calculations.
+ * @tparam T Floating-point mode used for model calculations.
  */
 template <typename T>
 void runLinearRegression(Logger& logger) {
 	static_assert(std::is_floating_point_v<T>,
-		"runLinearRegression requires floating point data type!");
+		"runLinearRegression requires floating point data mode!");
 
 	const std::filesystem::path datasetPath = "lineardata.csv";
 
@@ -96,11 +96,11 @@ void runLinearRegression(Logger& logger) {
 	Pipeline pipeline{
 		ZScoreScaler<T>{},
 		BatchGradientDescent<T>{},
+		logger,
 		GradientDescentOptions<T>{
 			.learningRate = T(0.01),
 			.epochs = 100
-		},
-		logger
+		}
 	};
 
 	pipeline.fit(dataSet.trainingData);

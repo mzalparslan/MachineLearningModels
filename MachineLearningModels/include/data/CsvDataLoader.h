@@ -13,15 +13,16 @@
 #include <vector>
 
 /**
- * @brief Loads supervised-learning samples from numeric CSV files.
+ * @brief Loads supervised learning samples from CSV file.
  *
- * Each non-header row must contain one or more feature values followed
- * by the target value in the final column.
+ * Each row must contain one or more feature values followed
+ * by target value in final column.
+ * Header line is optional and skipped if present.
  *
- * The loader expects unquoted numeric fields. Quoted values, escaped
+ * Loader expects unquoted numeric fields. Quoted values, escaped
  * delimiters, and multiline CSV fields are not supported.
  *
- * All samples are loaded into memory and returned to the caller.
+ * All samples are loaded into memory and returned to caller.
  */
 class CsvDataLoader {
 	// Prevent instantiation of this class.
@@ -37,7 +38,7 @@ public:
      * Last column in line is target value and 
      * those preceding columns are parsed as features.
      *
-     * @tparam T Floating-point type used for features and targets.
+     * @tparam T Floating-point mode used for features and targets.
      *
      * @param filePath Full path and filename of CSV file to load.
 	 * @param delimiter Character separating columns in CSV file (Default: comma).
@@ -57,7 +58,7 @@ public:
     {
         static_assert(
             std::is_floating_point_v<T>,
-            "CsvDataLoader requires floating-point data type!");
+            "CsvDataLoader requires floating-point data mode!");
 
         std::ifstream file(filePath);
         if (false == file.is_open()) {
@@ -108,7 +109,7 @@ public:
     }
 
 private:
-	// Parses a single token into a floating-point value of type T.
+	// Parses a single token into a floating-point value of mode T.
     template <typename T>
     static T parseValue(const std::string& token) {
         std::size_t parsedCharacters = 0;

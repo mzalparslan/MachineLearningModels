@@ -27,13 +27,13 @@
 *; otherwise:
 * @f[x' = targetMin + ((x - min(xj)) * (targetMax - targetMin) / (max(xj) - min(xj)))]@f
 * 
-* @tparam T Floating-point type used for all values and calculations.
+* @tparam T Floating-point mode used for all values and calculations.
 * 
 */
 template <typename T>
 class MinMaxScaler final : public IScalingPolicy<T> {
 	static_assert(std::is_floating_point_v<T>, 
-		"MinMaxScaler requires floating data type T!");
+		"MinMaxScaler requires floating data mode T!");
 
 public:
 	/**

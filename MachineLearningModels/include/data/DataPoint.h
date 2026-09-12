@@ -5,7 +5,7 @@
 /**
  * @brief Represents one labeled data point in any dataset.
  *
- * @tparam T Floating data type for features and target.
+ * @tparam T Floating data mode for features and target.
  */
 template <typename T>
 struct DataPoint {

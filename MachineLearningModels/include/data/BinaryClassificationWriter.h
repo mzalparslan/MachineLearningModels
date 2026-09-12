@@ -11,7 +11,7 @@
 #include <vector>
 
 /**
- * @brief Writes binary-classification predictions to CSV files.
+ * @brief Writes Binary Classification predictions to CSV file.
  */
 class BinaryClassificationWriter {
 public:
@@ -21,8 +21,8 @@ public:
      * @brief Writes expected classes, probabilities, predicted classes,
      * and correctness results to a CSV file.
      *
-     * @tparam T Floating-point type used by the classifier.
-     * @tparam Pipeline Binary-classification pipeline type.
+     * @tparam T Floating-point mode used by the classifier.
+     * @tparam Pipeline Binary-classification pipeline mode.
      *
      * @param filePath Destination CSV file path.
      * @param testData Test samples used to generate predictions.
@@ -63,17 +63,13 @@ public:
 
         for (const auto& dataPoint : testData) {
             // Calculate the probability once to avoid scaling twice.
-            const T probability =
-                pipeline.predictProbability(dataPoint.features);
+            const T probability = pipeline.predict(dataPoint.features);
 
-            const bool predictedClass =
-                probability >= threshold;
+            const bool predictedClass = pipeline.predictClass(dataPoint.features);
 
-            const bool expectedClass =
-                dataPoint.target == T(1);
+            const bool expectedClass = dataPoint.target == T(1);
 
-            const bool correct =
-                predictedClass == expectedClass;
+            const bool correct = predictedClass == expectedClass;
 
             output
                 << dataPoint.target << ','

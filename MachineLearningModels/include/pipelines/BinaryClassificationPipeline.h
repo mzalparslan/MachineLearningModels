@@ -17,7 +17,7 @@
  * Prediction inputs are automatically transformed using the scaling parameters
  * learned exclusively from the training dataset.
  *
- * @tparam T Floating-point type used for features and calculations.
+ * @tparam T Floating-point mode used for features and calculations.
  * @tparam Scaler Feature-scaling strategy.
  * @tparam Optimizer Optimization strategy used to train the classifier.
  */
@@ -38,19 +38,20 @@ public:
      */
     BinaryClassificationPipeline(
         Scaler scaler_,
-        Optimizer optimizer_,
-        GradientDescentOptions<T> options_,
-        Logger& logger)
+        Optimizer optimizer,
+        Logger& logger_,
+        GradientDescentOptions<T> options = {},
+        ExecutionStrategy<T> execStrategy = {})
         : scaler(std::move(scaler_)),
-        model(std::move(optimizer_), options_),
-        logger(logger) {
+        model(std::move(optimizer), options, execStrategy),
+        logger(logger_) {
 
         logger.debug() 
             << "Binary Classification configuration: "
-            << "Learning Rate=" << options_.learningRate
-            << ", Epochs=" << options_.epochs
-            << ", Regulate bias flag=" << options_.regularizeBias 
-            << ", Lambda: " << options_.lambda;
+            << "Learning Rate=" << options.learningRate
+            << ", Epochs=" << options.epochs
+            << ", Regulate bias flag=" << options.regularizeBias 
+            << ", Lambda: " << options.lambda;
     }
 
     /**
@@ -104,13 +105,13 @@ public:
      * @throws std::invalid_argument If the feature vector is invalid.
      */
     [[nodiscard]]
-    T predictProbability(std::vector<T> features) const {
+    T predict(std::vector<T> features) const {
         validateFitted();
 
         // Apply the parameters learned from the training dataset.
         scaler.transform(features);
 
-        return model.predictProbability(features);
+        return model.predict(features);
     }
 
     /**
@@ -126,7 +127,7 @@ public:
      * @throws std::invalid_argument If the features or threshold are invalid.
      */
     [[nodiscard]]
-    bool predict(
+    bool predictClass(
         std::vector<T> features,
         T threshold = T(0.5)) const {
         validateFitted();
@@ -134,7 +135,7 @@ public:
         // Apply the parameters learned from the training dataset.
         scaler.transform(features);
 
-        return model.predict(features, threshold);
+        return model.predictClass(features, threshold);
     }
 
 private:

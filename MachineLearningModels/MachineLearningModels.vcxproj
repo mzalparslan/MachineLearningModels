@@ -155,7 +155,8 @@
     <ClInclude Include="include\metrics\BenchmarkTimer.h" />
     <ClInclude Include="include\metrics\metrics.h" />
     <ClInclude Include="include\metrics\ScopedBenchmarkTimer.h" />
-    <ClInclude Include="include\models\IBinaryClassifier.h" />
+    <ClInclude Include="include\models\BaseRegressionModel.h" />
+    <ClInclude Include="include\models\ExecutionStrategy.h" />
     <ClInclude Include="include\models\IRegressionModel.h" />
     <ClInclude Include="include\models\LinearRegression.h" />
     <ClInclude Include="include\models\LogisticBinaryClassifier.h" />

@@ -28,7 +28,7 @@
  * This applies to linear regression with half mean-squared error and
  * logistic regression with sigmoid binary cross-entropy.
  *
- * @tparam T Floating-point type used for data, parameters, and
+ * @tparam T Floating-point mode used for data, parameters, and
  * optimization calculations.
  */
 template <typename T>
@@ -36,7 +36,7 @@ struct BatchGradientDescent {
 
 	static_assert(
 		std::is_floating_point_v<T>,
-		"BatchGradientDescent requires a floating-point type.");
+		"BatchGradientDescent requires a floating-point mode.");
 	
 	using Hypothesis = std::function<
 		T(

@@ -28,7 +28,7 @@ public:
      * A positive error means the model overestimated the target. A negative
      * error means it underestimated the target.
      *
-     * @tparam T Floating-point type used for targets and predictions.
+     * @tparam T Floating-point mode used for targets and predictions.
      * @tparam Pipeline Regression pipeline providing predict().
      *
      * @param filePath Destination CSV file path.
@@ -47,7 +47,7 @@ public:
     {
         static_assert(
             std::is_floating_point_v<T>,
-            "RegressionOutputWriter requires a floating-point type!");
+            "RegressionOutputWriter requires a floating-point mode!");
 
         if (true == testData.empty()) {
             throw std::invalid_argument(

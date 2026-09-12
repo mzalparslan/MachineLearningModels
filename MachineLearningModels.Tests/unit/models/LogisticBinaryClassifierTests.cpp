@@ -19,14 +19,14 @@ TEST(LogisticBinaryClassifierTest, FitAndPredict) {
 
     model.fit(trainingSet);
 
-    double probLow = model.predictProbability({ 0.15 });
-    double probHigh = model.predictProbability({ 0.85 });
+    double probLow = model.predictClass({ 0.15 });
+    double probHigh = model.predictClass({ 0.85 });
 
     EXPECT_LT(probLow, 0.5);
     EXPECT_GT(probHigh, 0.5);
 
-    EXPECT_FALSE(model.predict({ 0.15 }));
-    EXPECT_TRUE(model.predict({ 0.85 }));
+    EXPECT_FALSE(model.predictClass({ 0.15 }, 0.5));
+    EXPECT_TRUE(model.predictClass({ 0.85 }, 0.5));
 }
 
 TEST(LogisticBinaryClassifierTest, NonBinaryTargetsThrows) {
@@ -44,8 +44,8 @@ TEST(LogisticBinaryClassifierTest, PredictBeforeFitThrows) {
     BatchGradientDescent<double> optimizer;
     LogisticBinaryClassifier<double, BatchGradientDescent<double>> model(optimizer);
 
-    EXPECT_THROW(model.predictProbability({ 1.0 }), std::logic_error);
-    EXPECT_THROW(model.predict({ 1.0 }), std::logic_error);
+    EXPECT_THROW(model.predictClass({ 1.0 }), std::logic_error);
+    EXPECT_THROW(model.predictClass({ 1.0 }), std::logic_error);
 }
 
 TEST(LogisticBinaryClassifierTest, ThresholdValidation) {
@@ -59,8 +59,8 @@ TEST(LogisticBinaryClassifierTest, ThresholdValidation) {
     };
     model.fit(trainingSet);
 
-    EXPECT_THROW(model.predict({ 1.0 }, 0.0), std::invalid_argument);
-    EXPECT_THROW(model.predict({ 1.0 }, 1.0), std::invalid_argument);
-    EXPECT_THROW(model.predict({ 1.0 }, -0.1), std::invalid_argument);
-    EXPECT_THROW(model.predict({ 1.0 }, 1.1), std::invalid_argument);
+    EXPECT_THROW(model.predictClass({ 1.0 }, 0.0), std::invalid_argument);
+    EXPECT_THROW(model.predictClass({ 1.0 }, 1.0), std::invalid_argument);
+    EXPECT_THROW(model.predictClass({ 1.0 }, -0.1), std::invalid_argument);
+    EXPECT_THROW(model.predictClass({ 1.0 }, 1.1), std::invalid_argument);
 }

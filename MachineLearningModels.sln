@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MachineLearningModels.Tests
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MachineLearningModels.Examples", "MachineLearningModels.Examples\MachineLearningModels.Examples.vcxproj", "{7EF58354-C6BC-4FD2-AAD1-82A08A4C3054}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MachineLearningModels.Benchmarks", "MachineLearningModels.Benchmarks\MachineLearningModels.Benchmarks.vcxproj", "{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -43,6 +45,14 @@ Global
 		{7EF58354-C6BC-4FD2-AAD1-82A08A4C3054}.Release|x64.Build.0 = Release|x64
 		{7EF58354-C6BC-4FD2-AAD1-82A08A4C3054}.Release|x86.ActiveCfg = Release|Win32
 		{7EF58354-C6BC-4FD2-AAD1-82A08A4C3054}.Release|x86.Build.0 = Release|Win32
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Debug|x64.ActiveCfg = Debug|x64
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Debug|x64.Build.0 = Debug|x64
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Debug|x86.Build.0 = Debug|Win32
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Release|x64.ActiveCfg = Release|x64
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Release|x64.Build.0 = Release|x64
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Release|x86.ActiveCfg = Release|Win32
+		{E5C4C20D-36CB-4D6A-8AED-FCCB924FA6C4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

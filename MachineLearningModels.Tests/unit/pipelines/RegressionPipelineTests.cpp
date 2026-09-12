@@ -12,7 +12,7 @@ TEST(RegressionPipelineTest, EndToEndPipeline) {
     options.epochs = 1500;
 
     RegressionPipeline<double, NoScaling<double>, BatchGradientDescent<double>> pipeline(
-        scaler, optimizer, options, logger
+        scaler, optimizer, logger, options
     );
 
     std::vector<DataPoint<double>> trainingData = {
@@ -34,7 +34,7 @@ TEST(RegressionPipelineTest, PredictUnfittedThrows) {
     GradientDescentOptions<double> options;
 
     RegressionPipeline<double, NoScaling<double>, BatchGradientDescent<double>> pipeline(
-        scaler, optimizer, options, logger
+        scaler, optimizer, logger, options
     );
 
     EXPECT_THROW(pipeline.predict({ 1.0 }), std::logic_error);

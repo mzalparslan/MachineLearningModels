@@ -5,7 +5,7 @@
 /**
  * @brief Options for Gradient Descent optimization.
  *
- * @tparam T Floating data type for optimization parameters.
+ * @tparam T Floating data mode for optimization parameters.
  */
 template <typename T>
 struct GradientDescentOptions {
@@ -22,7 +22,7 @@ struct GradientDescentOptions {
 /**
  * @brief Options for Mini-Batch Gradient Descent optimization.
  *
- * @tparam T Floating data type for optimization parameters.
+ * @tparam T Floating data mode for optimization parameters.
  */
 template <typename T>
 struct MiniBatchGradientDescentOptions {
@@ -40,7 +40,7 @@ struct MiniBatchGradientDescentOptions {
 /**
  * @brief Options for Stochastic Gradient Descent optimization.
  *
- * @tparam T Floating data type for optimization parameters.
+ * @tparam T Floating data mode for optimization parameters.
  */
 template <typename T>
 struct StochasticGradientDescentOptions {

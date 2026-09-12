@@ -15,7 +15,7 @@
  *
  * Feature scaling can improve numerical stability and prevent overflows.
  *
- * @tparam T Floating-point type.
+ * @tparam T Floating-point mode.
  */
 template <typename T>
 class IScalingPolicy {

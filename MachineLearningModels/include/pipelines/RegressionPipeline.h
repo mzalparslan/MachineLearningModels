@@ -17,7 +17,7 @@
  * Predictions are automatically transformed using the scaling parameters
  * learned from the training dataset.
  *
- * @tparam T Floating-point type used for features and model calculations.
+ * @tparam T Floating-point mode used for features and model calculations.
  * @tparam Scaler Feature-scaling strategy.
  * @tparam Optimizer Optimization strategy used by the regression model.
  */
@@ -37,18 +37,20 @@ public:
      */
     RegressionPipeline(
         Scaler scaler_,
-        Optimizer optimizer_,
-        GradientDescentOptions<T> options_,
-        Logger &logger)
+        Optimizer optimizer,
+        Logger & logger_,
+		GradientDescentOptions<T> options = {},
+        ExecutionStrategy<T> execStrategy = {})
         : scaler(std::move(scaler_)),
-        model(std::move(optimizer_), options_), logger(logger) {
+        model(std::move(optimizer), options, execStrategy),
+        logger(logger_) {
 
         logger.debug()
             << "Linear Regression configuration: "
-            << "Learning Rate=" << options_.learningRate
-            << ", Epochs=" << options_.epochs
-            << ", Regulate bias flag=" << options_.regularizeBias
-            << ", Lambda: " << options_.lambda;
+            << "Learning Rate=" << options.learningRate
+            << ", Epochs=" << options.epochs
+            << ", Regulate bias flag=" << options.regularizeBias
+            << ", Lambda: " << options.lambda;
     }
 
     /**

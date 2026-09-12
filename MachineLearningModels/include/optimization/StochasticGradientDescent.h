@@ -31,14 +31,14 @@
  *
  * Optional L2 regularization can be applied to weights and bias.
  *
- * @tparam T Floating-point type used for data, parameters, and
+ * @tparam T Floating-point mode used for data, parameters, and
  * optimization calculations.
  */
 template <typename T>
 struct StochasticGradientDescent {
-	// Ensure that the template type T is floating-point type.
+	// Ensure that the template mode T is floating-point mode.
 	static_assert(std::is_floating_point_v<T>, 
-		"StochasticGradientDescent requires floating-point data type!");
+		"StochasticGradientDescent requires floating-point data mode!");
 
 	// Declaration for hypothesis method to be used 
 	// to predict output based on features and model parameters.

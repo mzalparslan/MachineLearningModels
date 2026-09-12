@@ -12,7 +12,7 @@
 /**
  * @brief Contains training and test datasets.
  *
- * @tparam T Floating-point data type for values.
+ * @tparam T Floating-point data mode for values.
  */
 template <typename T>
 struct Dataset {
@@ -33,7 +33,7 @@ public:
      *
      * Random seed makes shuffle reproducible.
      *
-     * @tparam T Floating-point data type.
+     * @tparam T Floating-point data mode.
      * @param samples Samples to shuffle and split.
      * @param trainingRatio Proportion assigned to the training dataset.
 	 * Must be strictly between 0 and 1. Default is 0.8 (80% training, 20% test).

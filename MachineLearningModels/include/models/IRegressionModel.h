@@ -2,15 +2,21 @@
 
 #include "DataPoint.h"
 #include <vector>
+#include <type_traits>
 
 /**
  * @brief Common interface for regression models.
  *
- * @tparam T Floating-point type used for features, targets,
+ * @tparam T Floating-point mode used for features, targets,
  * predictions, and model calculations.
  */
 template <typename T>
 class IRegressionModel {
+    // Only floating-point types are supported for model calculations.
+    static_assert(
+        std::is_floating_point_v<T>,
+        "Regression model can be used for floating-point types only!");
+
 public:
     virtual ~IRegressionModel() = default;
 

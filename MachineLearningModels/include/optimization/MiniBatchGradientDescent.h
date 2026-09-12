@@ -32,14 +32,14 @@
  *
  * Optional L2 regularization can be applied to weights and bias.
  *
- * @tparam T Floating-point type used for data, parameters, and
+ * @tparam T Floating-point mode used for data, parameters, and
  * optimization calculations.
  */
 template <typename T>
 struct MiniBatchGradientDescent {
 	static_assert(
 		std::is_floating_point_v<T>,
-		"MiniBatchGradientDescent requires a floating-point type.");
+		"MiniBatchGradientDescent requires a floating-point mode.");
 
 	using Hypothesis = std::function<T(
 		const std::vector<T>& features,

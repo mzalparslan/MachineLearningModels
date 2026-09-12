@@ -11,7 +11,7 @@
  * weight vector plus an intercept.
  *
  * Template parameter:
- *  - T: Floating-point data type only.
+ *  - T: Floating-point data mode only.
  */
 template <typename T>
 struct ModelParameters {

@@ -23,13 +23,13 @@
  *
  * Constant feature values observed during fitting are mapped to zero.
  *
- * @tparam T Floating-point type used for values and calculations.
+ * @tparam T Floating-point mode used for values and calculations.
  *
  */
 template <typename T>
 class MeanNormScaler final : public IScalingPolicy<T> {
     static_assert(std::is_floating_point_v<T>,
-        "MeanNormScaler requires floating data type T!");
+        "MeanNormScaler requires floating data mode T!");
 
 public:
     /**
