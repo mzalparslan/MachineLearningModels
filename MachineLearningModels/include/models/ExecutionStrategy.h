@@ -56,14 +56,7 @@ public:
 	/// @brief Defaults execution strategy to inner_product.
 	ExecutionStrategy() = default;
 
-    /**
-     * @brief Constructs a strategy with the requested execution mode.
-     *
-     * @param mode_ Execution mode used for linear-output calculations.
-     */
-    explicit ExecutionStrategy(ExecutionMode mode_)
-        : mode(mode_) {
-    }
+    ExecutionStrategy(ExecutionMode mode_) : mode(mode_) { };
 
     /**
      * @brief Calculates the linear output for one feature vector.

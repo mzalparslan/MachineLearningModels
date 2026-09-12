@@ -38,12 +38,8 @@ struct BatchGradientDescent {
 		std::is_floating_point_v<T>,
 		"BatchGradientDescent requires a floating-point mode.");
 	
-	using Hypothesis = std::function<
-		T(
-			const std::vector<T>& features,
-			const ModelParameters<T>& modelParameters
-		)
-	>;
+	using Hypothesis = std::function<T(const std::vector<T>& features, 
+		const ModelParameters<T>& modelParameters)>;
 
 	using Options = GradientDescentOptions<T>;
 

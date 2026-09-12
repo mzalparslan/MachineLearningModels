@@ -27,6 +27,10 @@ protected:
     // Optimizer-specific configuration type.
     using Options = typename Optimizer::Options;
 
+	const ModelParameters<T>& getModelParameters() const {
+		return modelParameters;
+	}
+
 public:
     virtual ~BaseRegressionModel() = default;
 
