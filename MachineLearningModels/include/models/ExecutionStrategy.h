@@ -53,13 +53,15 @@ class ExecutionStrategy {
         "ExecutionStrategy requires a floating-point type.");
 
 public:
+	/// @brief Defaults execution strategy to inner_product.
+	ExecutionStrategy() = default;
+
     /**
      * @brief Constructs a strategy with the requested execution mode.
      *
      * @param mode_ Execution mode used for linear-output calculations.
      */
-    explicit ExecutionStrategy(
-        ExecutionMode mode_ = ExecutionMode::InnerProduct)
+    explicit ExecutionStrategy(ExecutionMode mode_)
         : mode(mode_) {
     }
 
@@ -121,7 +123,7 @@ public:
 
 private:
     // Execution mode selected when the strategy was constructed.
-    ExecutionMode mode;
+    ExecutionMode mode = ExecutionMode::InnerProduct;
 
     // Applies transform_reduce using the supplied standard execution policy.
     template <typename ExecutionPolicy>

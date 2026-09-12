@@ -2,6 +2,7 @@
 #include "RegressionPipeline.h"
 #include "NoScaling.h"
 #include "BatchGradientDescent.h"
+#include "ZScoreScaler.h"
 
 TEST(RegressionPipelineTest, EndToEndPipeline) {
     Logger logger(LogLevel::Error);
@@ -38,4 +39,17 @@ TEST(RegressionPipelineTest, PredictUnfittedThrows) {
     );
 
     EXPECT_THROW(pipeline.predict({ 1.0 }), std::logic_error);
+}
+
+TEST(RegressionPipelineTest, FitDoesNotModifyCallersData) {
+    Logger logger(LogLevel::Error);
+    RegressionPipeline<double, ZScoreScaler<double>, BatchGradientDescent<double>>
+        pipeline(ZScoreScaler<double>{}, BatchGradientDescent<double>{}, logger);
+
+    std::vector<DataPoint<double>> data{ {{1.0}, 3.0}, {{2.0}, 5.0}, {{3.0}, 7.0} };
+    pipeline.fit(data);
+
+    EXPECT_DOUBLE_EQ(data[0].features[0], 1.0);
+    EXPECT_DOUBLE_EQ(data[1].features[0], 2.0);
+    EXPECT_DOUBLE_EQ(data[2].features[0], 3.0);
 }

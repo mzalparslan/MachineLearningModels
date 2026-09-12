@@ -56,15 +56,13 @@ public:
     /**
      * @brief Fits the scaler and regression model using training data.
      *
-     * This operation modifies the feature values in `trainingData` by applying
-     * the fitted scaler. Scaling parameters are learned exclusively from this
-     * training dataset.
-     *
-     * @param trainingData Samples used to fit the scaler and model.
+     * @param trainingData Samples used to fit the scaler and model. 
+     * Taken by value: pass an lvalue to keep your own copy unscaled, 
+     * or std::move() it to hand over ownership and avoid copy.
      *
      * @throws std::exception If fitting or transformation fails.
      */
-    void fit(std::vector<DataPoint<T>>& trainingData) {
+    void fit(std::vector<DataPoint<T>> trainingData) {
         ScopedBenchmarkTimer benchmark(logger, "RegressionPipeline::fit");
         // Prevent prediction if any stage of refitting fails.
         isFitted = false;

@@ -57,14 +57,13 @@ public:
     /**
      * @brief Fits the scaler and classifier using training data.
      *
-     * This operation modifies the feature values in `trainingData` by applying
-     * the fitted scaler. All sample targets must represent valid binary labels.
-     *
-     * @param trainingData Samples used to fit the scaler and classifier.
+      * @param trainingData Samples used to fit the scaler and model. 
+      * Taken by value: pass an lvalue to keep your own copy unscaled, 
+      * or std::move() it to hand over ownership and avoid copy.
      *
      * @throws std::exception If scaling, validation, or training fails.
      */
-    void fit(std::vector<DataPoint<T>>& trainingData) {
+    void fit(std::vector<DataPoint<T>> trainingData) {
         logger.info()
             << "Binary classification training started. Samples: "
             << trainingData.size();
