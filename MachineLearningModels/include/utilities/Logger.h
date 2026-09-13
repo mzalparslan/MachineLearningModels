@@ -62,6 +62,23 @@ public:
         LogLevel minimumLevel = LogLevel::Info,
         std::ostream& output = std::clog);
 
+    /**
+     * @brief Shared logger used by callers that don't supply their own.
+     *
+     * A single, program-wide instance (LogLevel::Info, writing to
+     * std::clog) -- not one instance per caller. Callers that only need
+     * a default (RegressionPipeline and BinaryClassificationPipeline,
+     * for instance) should use this rather than keeping their own
+     * function-local static Logger: a static local inside a member
+     * function of a class template is per-instantiation, so each
+     * distinct template instantiation would otherwise get its own,
+     * separately configured default logger instead of sharing one.
+     *
+     * @return The shared default logger.
+     */
+    [[nodiscard]]
+    static Logger& instance();
+
     [[nodiscard]]
     LogEntry debug();
 

@@ -48,7 +48,7 @@ public:
         Optimizer optimizer,
         GradientDescentOptions<T> options = {},
         ExecutionStrategy<T> execStrategy = {},
-        Logger& logger_ = defaultLogger())
+        Logger& logger_ = Logger::instance())
         : scaler(std::move(scaler_)),
         // execStrategy isn't needed after construction, so it is moved in;
         // options is still read below for the debug log, so it is copied.
@@ -223,12 +223,6 @@ private:
             throw std::logic_error(
                 "BinaryClassificationPipeline: Call fit() first!");
         }
-    }
-
-    // Shared logger used when the caller doesn't supply one.
-    static Logger& defaultLogger() {
-        static Logger instance;
-        return instance;
     }
 
     Scaler scaler;
