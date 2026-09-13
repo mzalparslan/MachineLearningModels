@@ -2,12 +2,13 @@
 
 #include "DataPoint.h"
 
+#include <charconv>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -80,11 +81,24 @@ public:
         }
 
         std::size_t lineNumber = hasHeader ? 1 : 0;
+        std::size_t expectedColumns = 0;
         while (std::getline(file, line)) {
-            ++lineNumber;
-            
+            lineNumber++;
+
+            // Tolerate CRLF line endings (files authored on Windows,
+            // read back on a platform whose streams don't strip '\r').
+            if (false == line.empty() && '\r' == line.back()) {
+                line.pop_back();
+            }
+
             try {
-                samples.push_back(parseSample<T>(line, delimiter));
+                DataPoint<T> sample = parseSample<T>(line, delimiter, expectedColumns);
+
+                if (0 == expectedColumns) {
+                    expectedColumns = sample.features.size() + 1;
+                }
+
+                samples.push_back(std::move(sample));
             }
             catch (const std::exception& error) {
                 throw std::runtime_error(
@@ -110,19 +124,23 @@ public:
 
 private:
 	// Parses a single token into a floating-point value of mode T.
+	// Uses std::from_chars rather than std::stold: it is locale-independent
+	// (stold honours the current C locale, where some locales use ','
+	// as the decimal separator -- same character as our default
+	// delimiter), does not throw, and avoids an intermediate allocation.
     template <typename T>
-    static T parseValue(const std::string& token) {
-        std::size_t parsedCharacters = 0;
+    static T parseValue(std::string_view token) {
+        T value{};
 
-        const long double parsedValue =
-            std::stold(token, &parsedCharacters);
-
-        if (parsedCharacters != token.size()) {
+        const auto result = std::from_chars(
+            token.data(), token.data() + token.size(), value);
+		
+        if (result.ec != std::errc{} ||
+            result.ptr != token.data() + token.size()) {
             throw std::invalid_argument(
-                "CsvDataLoader: Invalid token: " + token);
+                "CsvDataLoader: Invalid token: " + std::string(token));
         }
 
-        const T value = static_cast<T>(parsedValue);
         if (false == std::isfinite(value)) {
             throw std::invalid_argument(
                 "CsvDataLoader: Value is NaN, Inf, or out of range!");
@@ -132,8 +150,12 @@ private:
     }
 
 	// Parses a single CSV line into a DataPoint<T> object.
+	//
+	// @param expectedColumns Column count (features + target) every row
+	// must match, or zero to accept this row's count as authoritative.
     template <typename T>
-    static DataPoint<T> parseSample(const std::string& line, char delimiter) {
+    static DataPoint<T> parseSample(
+        std::string_view line, char delimiter, std::size_t expectedColumns) {
 
 		if (true == line.empty()) {
 			throw std::invalid_argument("CsvDataLoader: Empty line in CSV file!");
@@ -143,22 +165,40 @@ private:
             throw std::invalid_argument("CsvDataLoader: Line ends with delimiter!");
         }
 
-        std::stringstream stream(line);
-        std::string token;
         std::vector<T> rowValues;
 
-        while (std::getline(stream, token, delimiter)) {
+        std::size_t tokenStart = 0;
+        while (true) {
+            const std::size_t delimiterPosition = line.find(delimiter, tokenStart);
+			// Extract token from line, either up to next delimiter or to end of line.
+            const std::string_view token = (std::string_view::npos == delimiterPosition)
+                ? line.substr(tokenStart)
+                : line.substr(tokenStart, delimiterPosition - tokenStart);
+
             if (true == token.empty()) {
                 throw std::invalid_argument(
                     "CsvDataLoader: CSV row contains an empty value!");
             }
 
             rowValues.push_back(parseValue<T>(token));
+			// If no more delimiters, break out of loop.
+            if (std::string_view::npos == delimiterPosition) {
+                break;
+            }
+
+			// Skip delimiter and start next token after it.
+            tokenStart = delimiterPosition + 1;
         }
 
         if (rowValues.size() < 2) {
             throw std::invalid_argument(
                 "CsvDataLoader: Requires at least 1 feature and 1 target!");
+        }
+
+        if (0 != expectedColumns && rowValues.size() != expectedColumns) {
+            throw std::invalid_argument(
+                "CsvDataLoader: Expected " + std::to_string(expectedColumns) +
+                " columns but found " + std::to_string(rowValues.size()) + "!");
         }
 
         const T target = rowValues.back();

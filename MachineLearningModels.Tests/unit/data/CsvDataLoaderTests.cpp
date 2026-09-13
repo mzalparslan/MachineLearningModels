@@ -6,13 +6,13 @@
 class CsvDataLoaderTest : public ::testing::Test {
 protected:
     std::filesystem::path tempFilePath;
-
+	// Remove temporary file after each test.
     void TearDown() override {
         if (std::filesystem::exists(tempFilePath)) {
             std::filesystem::remove(tempFilePath);
         }
     }
-
+	// Create a temporary CSV file with given content.
     void createTempCsv(const std::string& content) {
         tempFilePath = std::filesystem::temp_directory_path() / "test_data.csv";
         std::ofstream out(tempFilePath);
@@ -80,4 +80,20 @@ TEST_F(CsvDataLoaderTest, InsufficientColumnsThrows) {
 TEST_F(CsvDataLoaderTest, TrailingDelimiterThrows) {
     createTempCsv("f1,f2,target\n1.0,2.0,5.0,\n");
     EXPECT_THROW(CsvDataLoader::load<double>(tempFilePath, ',', true), std::runtime_error);
+}
+
+TEST_F(CsvDataLoaderTest, InconsistentColumnCountThrows) {
+    createTempCsv("f1,f2,target\n1.0,2.0,5.0\n1.0,2.0,3.0,5.0\n");
+    EXPECT_THROW(CsvDataLoader::load<double>(tempFilePath, ',', true), std::runtime_error);
+}
+
+TEST_F(CsvDataLoaderTest, ToleratesCrlfLineEndings) {
+    createTempCsv("f1,f2,target\r\n1.0,2.0,5.0\r\n3.0,4.0,10.0\r\n");
+
+    auto samples = CsvDataLoader::load<double>(tempFilePath, ',', true);
+    ASSERT_EQ(samples.size(), 2u);
+
+    EXPECT_DOUBLE_EQ(samples[0].features[0], 1.0);
+    EXPECT_DOUBLE_EQ(samples[0].target, 5.0);
+    EXPECT_DOUBLE_EQ(samples[1].target, 10.0);
 }
