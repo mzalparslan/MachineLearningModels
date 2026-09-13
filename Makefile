@@ -53,11 +53,11 @@ DEPENDENCY_FILES := \
 GTEST_LIBS ?= -lgtest_main -lgtest -pthread
 
 # libstdc++ routes the parallel execution policies (std::execution::par,
-# par_unseq) through Intel TBB; without linking it, ExecutionMode::Parallel
-# and ParallelVectorized silently execute sequentially instead of failing
-# to build, so a missing -ltbb hides itself as a performance regression
-# rather than a link error. Install it via your package manager (e.g.
-# `apt install libtbb-dev`) if it isn't already on your system.
+# par_unseq) through Intel TBB, and every target below links against it,
+# so a missing libtbb-dev fails the build at the link step (cannot find
+# -ltbb) rather than degrading ExecutionMode::Parallel/ParallelVectorized
+# to silent sequential execution at runtime. Install it via your package
+# manager (e.g. `apt install libtbb-dev`) if it isn't already on your system.
 PARALLEL_LIBS ?= -ltbb
 
 .PHONY: all library examples tests test benchmarks clean help

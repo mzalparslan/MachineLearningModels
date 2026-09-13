@@ -84,6 +84,7 @@ Debug → Start Without Debugging
 - A C++20-compatible compiler
 - GNU Make for the Linux build
 - Google Test for building the test project
+- Intel TBB (`libtbb-dev` on Ubuntu/WSL) -- required to link, not optional
 - Visual Studio 2022 with C++ desktop-development tools for the Windows solution
 
 On Ubuntu or WSL, install the required development packages with:
@@ -94,9 +95,11 @@ sudo apt install build-essential libgtest-dev libtbb-dev
 ```
 
 `libtbb-dev` is required because libstdc++ routes the parallel execution
-policies (`std::execution::par`, `par_unseq`) through Intel TBB; without
-it linked in, those execution modes silently run sequentially instead of
-failing to build.
+policies (`std::execution::par`, `par_unseq`) through Intel TBB, and the
+Makefile links every target against it. Skip this package and the build
+fails at the link step with `cannot find -ltbb`, not a silent runtime
+fallback to sequential execution -- so if you hit that error, this is the
+fix.
 
 ## Building on Linux or WSL
 
