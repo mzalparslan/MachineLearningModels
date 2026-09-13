@@ -1,8 +1,6 @@
 #pragma once
 
-#include "IScalingPolicy.h"
 #include "DataPoint.h"
-#include "ModelParameters.h"
 
 #include <algorithm>
 #include <cmath>
@@ -27,7 +25,7 @@
  *
  */
 template <typename T>
-class MeanNormScaler final : public IScalingPolicy<T> {
+class MeanNormScaler {
     static_assert(std::is_floating_point_v<T>,
         "MeanNormScaler requires floating data mode T!");
 
@@ -42,7 +40,7 @@ public:
      * @throws std::runtime_error If accumulating or calculating a statistic
 	 * produces non-finite value.
      */
-    void fit(const std::vector<DataPoint<T>>& trainingSet) override {
+    void fit(const std::vector<DataPoint<T>>& trainingSet) {
 		// Reset flag.
         isFitted = false;
 
@@ -66,6 +64,12 @@ public:
         std::vector<T> featureMinimums(featureCount, std::numeric_limits<T>::max());
         std::vector<T> featureMaximums(featureCount, std::numeric_limits<T>::lowest());
 
+		// Accumulate in long double rather than T: with T = float and a large
+		// example count, a running sum in T grows until each new addend
+		// falls below the accumulator's ULP and is silently dropped, biasing
+		// the mean. Only narrow back to T once the statistic is final.
+		std::vector<long double> means(featureCount, 0.0L);
+
         for (const auto& example : trainingSet) {
             if (example.features.size() != featureCount) {
                 throw std::invalid_argument(
@@ -80,9 +84,9 @@ public:
                         "MeanNormScaler::fit: Feature is NaN or Inf!");
                 }
 
-                featureMeans[j] += value;
+                means[j] += static_cast<long double>(value);
 
-                if (false == std::isfinite(featureMeans[j])) {
+                if (false == std::isfinite(means[j])) {
                     throw std::runtime_error(
                         "MeanNormScaler::fit: Feature sum is NaN or Inf!");
                 }
@@ -93,18 +97,20 @@ public:
             }
         }
 
-        const T exampleCountT = static_cast<T>(exampleCount);
+        const long double exampleCountLD = static_cast<long double>(exampleCount);
 
         for (std::size_t j = 0; j < featureCount; ++j) {
 			// Calculate mean and range for each feature.
-            featureMeans[j] /= exampleCountT;
+            means[j] /= exampleCountLD;
             featureRanges[j] = featureMaximums[j] - featureMinimums[j];
 
-            if (false == std::isfinite(featureMeans[j]) || 
+            if (false == std::isfinite(means[j]) ||
                 false == std::isfinite(featureRanges[j])) {
                 throw std::runtime_error(
                     "MeanNormScaler::fit: Mean or range is NaN or Inf!");
             }
+
+            featureMeans[j] = static_cast<T>(means[j]);
         }
 
         isFitted = true;
@@ -120,7 +126,7 @@ public:
      * or an input value is non-finite.
      * @throws std::runtime_error If scaling produces non-finite value.
      */
-    void transform(std::vector<T>& features) const override {
+    void transform(std::vector<T>& features) const {
         if (false == isFitted) {
             throw std::logic_error(
                 "MeanNormScaler::transform: Call fit() before transform()!");

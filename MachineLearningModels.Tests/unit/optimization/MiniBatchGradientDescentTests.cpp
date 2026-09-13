@@ -39,6 +39,6 @@ TEST(MiniBatchGradientDescentTest, ZeroBatchSizeThrows) {
     options.batchSize = 0;
     ModelParameters<double> params{ { 0.0 }, 0.0 };
 
-    auto hypothesis = [](const std::vector<double>& f, const ModelParameters<double>& p) { return p.bias; };
+    auto hypothesis = [](const std::vector<double>&, const ModelParameters<double>& p) { return p.bias; };
     EXPECT_THROW(mbgd.optimize(trainingSet, options, params, hypothesis), std::invalid_argument);
 }

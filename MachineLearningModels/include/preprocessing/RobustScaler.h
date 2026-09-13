@@ -1,8 +1,6 @@
 #pragma once
 
-#include "IScalingPolicy.h"
 #include "DataPoint.h"
-#include "ModelParameters.h"
 
 #include <algorithm>
 #include <cmath>
@@ -27,7 +25,7 @@
  * @tparam T Floating-point mode used for values and calculations.
  */
 template <typename T>
-class RobustScaler final : public IScalingPolicy<T> {
+class RobustScaler {
     static_assert(std::is_floating_point_v<T>,
         "RobustScaler requires floating data mode T!");
 
@@ -42,7 +40,7 @@ public:
 	 * @throws std::runtime_error If calculating median or IQR 
      * produces non-finite value.
      */
-    void fit(const std::vector<DataPoint<T>>& trainingSet) override {
+    void fit(const std::vector<DataPoint<T>>& trainingSet) {
         // Reset fitted flag.
         isFitted = false;
 
@@ -85,8 +83,6 @@ public:
                 columnData.push_back(value);
             }
 
-            std::sort(columnData.begin(), columnData.end());
-
             const T q1 = calculatePercentile(columnData, T(0.25));
 
             medians[j] = calculatePercentile(columnData, T(0.50));
@@ -123,7 +119,7 @@ public:
      *         or an input feature is non-finite.
      * @throws std::runtime_error If scaling produces a non-finite value.
      */
-    void transform(std::vector<T>& features) const override {
+    void transform(std::vector<T>& features) const {
         if (false == isFitted) {
             throw std::logic_error(
                 "RobustScaler::transform: Call fit() before transform!");
@@ -151,26 +147,33 @@ public:
 
 private:
 		/**
-		 * @brief Calculates the percentile value from a sorted vector.
+		 * @brief Calculates the percentile value from a column of values.
 		 *
-		 * @param sortedValues Vector of values sorted in ascending order.
-		 * @param probability Percentile to calculate (0.0 to 1.0).
+		 * Uses std::nth_element rather than a full sort: computing one
+		 * percentile only needs the value(s) at its rank, not a total
+		 * order over the whole column, so this is O(n) instead of
+		 * O(n log n) per feature.
+		 *
+		 * @param columnData Column values; reordered in place.
+		 * @param quantile Percentile to calculate (0.0 to 1.0).
 		 *
 		 * @return The calculated percentile value.
 		 */
-        static T calculatePercentile(const std::vector<T>& sortedValues, T quantile)
+        static T calculatePercentile(std::vector<T>& columnData, T quantile)
         {
-            const T position = quantile * static_cast<T>(sortedValues.size() - 1);
+            const T position = quantile * static_cast<T>(columnData.size() - 1);
 
             const std::size_t lowerIndex = static_cast<std::size_t>(std::floor(position));
-            const std::size_t upperIndex = std::min(lowerIndex + 1, sortedValues.size() - 1);
+            const std::size_t upperIndex = std::min(lowerIndex + 1, columnData.size() - 1);
+
+            std::nth_element(columnData.begin(), columnData.begin() + upperIndex, columnData.end());
+            std::nth_element(columnData.begin(), columnData.begin() + lowerIndex, columnData.begin() + upperIndex);
 
             const T weight = position - static_cast<T>(lowerIndex);
 
-            return sortedValues[lowerIndex] + (sortedValues[upperIndex] - sortedValues[lowerIndex]) * weight;
+            return columnData[lowerIndex] + (columnData[upperIndex] - columnData[lowerIndex]) * weight;
         }
 
-private:
     // Flag to indicate if scaling parameters have been fitted.
     bool isFitted = false;
     // Median for each feature in training set.

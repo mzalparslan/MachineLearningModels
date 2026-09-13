@@ -1,9 +1,13 @@
 #pragma once
 
+#include "ScalingPolicy.h"
 #include "LinearRegression.h"
 #include "Logger.h"
+#include "OptimizationPolicy.h"
 #include "ScopedBenchmarkTimer.h"
+#include "metrics.h"
 
+#include <cmath>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -23,8 +27,8 @@
  */
 template <
     typename T,
-    typename Scaler,
-    typename Optimizer>
+    ScalingPolicy<T> Scaler,
+    OptimizationPolicy<T> Optimizer>
 class RegressionPipeline {
 public:
     /**
@@ -33,16 +37,20 @@ public:
      * @param scaler Scaling strategy used to preprocess features.
      * @param optimizer Optimization strategy used to train the model.
      * @param options Configuration options supplied to the optimizer.
-     * @param logger Generic logger to log details and issues.
+     * @param execStrategy Strategy used to calculate linear outputs.
+     * @param logger Generic logger to log details and issues. Defaults to
+     * a shared logger at LogLevel::Info if the caller doesn't supply one.
      */
     RegressionPipeline(
         Scaler scaler_,
         Optimizer optimizer,
-        Logger & logger_,
-		GradientDescentOptions<T> options = {},
-        ExecutionStrategy<T> execStrategy = {})
+        GradientDescentOptions<T> options = {},
+        ExecutionStrategy<T> execStrategy = {},
+        Logger& logger_ = defaultLogger())
         : scaler(std::move(scaler_)),
-        model(std::move(optimizer), options, execStrategy),
+        // execStrategy isn't needed after construction, so it is moved in;
+        // options is still read below for the debug log, so it is copied.
+        model(std::move(optimizer), options, std::move(execStrategy)),
         logger(logger_) {
 
         logger.debug()
@@ -106,10 +114,7 @@ public:
      */
     [[nodiscard]]
     T predict(std::vector<T> features) const {
-        if (false == isFitted) {
-            throw std::logic_error(
-                "RegressionPipeline::predict: Call fit() first.");
-        }
+        validateFitted();
 
         // Use the parameters learned from training data.
         scaler.transform(features);
@@ -117,7 +122,61 @@ public:
         return model.predict(features);
     }
 
+    /**
+     * @brief Evaluates the fitted pipeline against a held-out test set.
+     *
+     * @param testData Test samples with unscaled features.
+     *
+     * @return Regression metrics computed from the pipeline's predictions.
+     *
+     * @throws std::logic_error If the pipeline has not been fitted.
+     * @throws std::invalid_argument If testData is empty.
+     */
+    [[nodiscard]]
+    RegressionMetrics evaluate(const std::vector<DataPoint<T>>& testData) const {
+        validateFitted();
+
+        if (true == testData.empty()) {
+            throw std::invalid_argument(
+                "RegressionPipeline::evaluate: Test data is empty.");
+        }
+
+        std::vector<T> predictions;
+        std::vector<T> targets;
+        predictions.reserve(testData.size());
+        targets.reserve(testData.size());
+
+        for (const auto& dataPoint : testData) {
+            predictions.push_back(predict(dataPoint.features));
+            targets.push_back(dataPoint.target);
+        }
+
+        RegressionMetrics result;
+        result.mse = metrics::meanSquaredError(predictions, targets);
+        result.rmse = std::sqrt(result.mse);
+        result.mae = metrics::meanAbsoluteError(predictions, targets);
+        result.rSquared = metrics::rSquared(predictions, targets);
+        result.withinToleranceRatio =
+            metrics::withinToleranceRatio(predictions, targets);
+
+        return result;
+    }
+
 private:
+    // Ensure that scaling and model parameters are available.
+    void validateFitted() const {
+        if (false == isFitted) {
+            throw std::logic_error(
+                "RegressionPipeline::predict: Call fit() first.");
+        }
+    }
+
+    // Shared logger used when the caller doesn't supply one.
+    static Logger& defaultLogger() {
+        static Logger instance;
+        return instance;
+    }
+
     Scaler scaler;
     LinearRegression<T, Optimizer> model;
     bool isFitted = false;

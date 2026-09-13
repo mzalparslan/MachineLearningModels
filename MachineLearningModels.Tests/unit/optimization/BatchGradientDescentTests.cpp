@@ -42,11 +42,44 @@ TEST(BatchGradientDescentTest, InvalidHypothesisThrows) {
     EXPECT_THROW(bgd.optimize(trainingSet, options, params, emptyHypothesis), std::invalid_argument);
 }
 
+TEST(BatchGradientDescentTest, EpochCallbackReceivesDecreasingCost) {
+    BatchGradientDescent<double> bgd;
+
+    std::vector<DataPoint<double>> trainingSet = {
+        DataPoint<double>{ { 1.0 }, 3.0 },
+        DataPoint<double>{ { 2.0 }, 5.0 },
+        DataPoint<double>{ { 3.0 }, 7.0 },
+        DataPoint<double>{ { 4.0 }, 9.0 }
+    };
+
+    GradientDescentOptions<double> options;
+    options.learningRate = 0.05;
+    options.epochs = 200;
+
+    ModelParameters<double> params{ { 0.0 }, 0.0 };
+
+    auto hypothesis = [](const std::vector<double>& features, const ModelParameters<double>& p) {
+        return std::inner_product(p.weights.begin(), p.weights.end(), features.begin(), p.bias);
+    };
+
+    std::vector<double> costPerEpoch;
+    bgd.optimize(trainingSet, options, params, hypothesis,
+        [&costPerEpoch](std::size_t epoch, double cost) {
+            EXPECT_EQ(costPerEpoch.size(), epoch);
+            costPerEpoch.push_back(cost);
+        });
+
+    ASSERT_EQ(costPerEpoch.size(), options.epochs);
+    // Training on a perfectly linear dataset should drive the mean
+    // squared residual down substantially from its initial value.
+    EXPECT_LT(costPerEpoch.back(), costPerEpoch.front() * 0.5);
+}
+
 TEST(BatchGradientDescentTest, InvalidOptionsThrows) {
     BatchGradientDescent<double> bgd;
     std::vector<DataPoint<double>> trainingSet = { DataPoint<double>{ { 1.0 }, 2.0 } };
     ModelParameters<double> params{ { 0.0 }, 0.0 };
-    auto hypothesis = [](const std::vector<double>& f, const ModelParameters<double>& p) { return p.bias; };
+    auto hypothesis = [](const std::vector<double>&, const ModelParameters<double>& p) { return p.bias; };
 
     GradientDescentOptions<double> badLr;
     badLr.learningRate = -0.01;

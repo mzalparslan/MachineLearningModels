@@ -11,6 +11,12 @@
     <ClCompile Include="unit\metrics\BenchmarkTimerTests.cpp">
       <Filter>unit\metrics</Filter>
     </ClCompile>
+    <ClCompile Include="unit\metrics\MetricsTests.cpp">
+      <Filter>unit\metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\models\ExecutionStrategyTests.cpp">
+      <Filter>unit\models</Filter>
+    </ClCompile>
     <ClCompile Include="unit\models\LinearRegressionTests.cpp">
       <Filter>unit\models</Filter>
     </ClCompile>
@@ -21,6 +27,9 @@
       <Filter>unit\optimization</Filter>
     </ClCompile>
     <ClCompile Include="unit\optimization\MiniBatchGradientDescentTests.cpp">
+      <Filter>unit\optimization</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\optimization\OptimizerAgreementTests.cpp">
       <Filter>unit\optimization</Filter>
     </ClCompile>
     <ClCompile Include="unit\optimization\StochasticGradientDescentTests.cpp">

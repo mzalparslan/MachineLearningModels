@@ -90,8 +90,13 @@ On Ubuntu or WSL, install the required development packages with:
 
 ```bash
 sudo apt update
-sudo apt install build-essential libgtest-dev
+sudo apt install build-essential libgtest-dev libtbb-dev
 ```
+
+`libtbb-dev` is required because libstdc++ routes the parallel execution
+policies (`std::execution::par`, `par_unseq`) through Intel TBB; without
+it linked in, those execution modes silently run sequentially instead of
+failing to build.
 
 ## Building on Linux or WSL
 
@@ -108,6 +113,7 @@ make library
 make examples
 make tests
 make test
+make benchmarks
 ```
 
 Build an optimized configuration with:
@@ -144,10 +150,15 @@ The program writes predictions to `binaryOutput.csv` and `linearOutput.csv`.
 ## Building with Visual Studio
 
 1. Open `MachineLearningModels.sln` in Visual Studio 2022.
-2. Select the desired configuration and platform, such as `Debug | x64`.
-3. Build the solution.
-4. Set **MachineLearningModels.Examples** as the startup project.
-5. Set its debugging working directory to `$(TargetDir)`.
+2. Restore NuGet packages for `MachineLearningModels.Tests` (its
+   `packages.config` is tracked, but the packages it restores into
+   `packages/` are not). Visual Studio does this automatically on build;
+   if it doesn't, right-click the solution and choose **Restore NuGet
+   Packages**.
+3. Select the desired configuration and platform, such as `Debug | x64`.
+4. Build the solution.
+5. Set **MachineLearningModels.Examples** as the startup project.
+6. Set its debugging working directory to `$(TargetDir)`.
 
 The example datasets must be copied from `resources/` to `$(TargetDir)` before
 the example program is launched. The project can perform this through its build

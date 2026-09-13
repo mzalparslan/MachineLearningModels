@@ -25,12 +25,11 @@ void runBinaryClassification(Logger &logger) {
 	static_assert(std::is_floating_point_v<T>,
 		"runBinaryClassification requires floating point data mode!");
 
-	const std::filesystem::path datasetPath = "classification.csv";
+	const std::filesystem::path dataFile = "classification.csv";
 
 	ScopedBenchmarkTimer benchmark(logger, "runBinaryClassification");
 
-	const std::filesystem::path dataFile{ datasetPath };
-	logger.info() << "Loading dataset from " << dataFile;
+	logger.info() << "Loading dataset from " << dataFile.string();
 
 	auto samples = CsvDataLoader::load<T>(dataFile);
 	logger.info() << "Count of data loaded: " << samples.size();
@@ -47,14 +46,22 @@ void runBinaryClassification(Logger &logger) {
 	Pipeline pipeline{
 		ZScoreScaler<T>{},
 		BatchGradientDescent<T>{},
-		logger,
 		GradientDescentOptions<T>{
 			.learningRate = T(0.01),
 			.epochs = 100
-		}
+		},
+		ExecutionStrategy<T>{},
+		logger
 	};
 
 	pipeline.fit(dataSet.trainingData);
+
+	const BinaryClassificationMetrics testMetrics = pipeline.evaluate(dataSet.testData);
+	logger.info() << "Test accuracy: " << testMetrics.accuracy
+		<< ", precision: " << testMetrics.precision
+		<< ", recall: " << testMetrics.recall
+		<< ", F1: " << testMetrics.f1Score
+		<< ", cross-entropy: " << testMetrics.binaryCrossEntropy;
 
 	const std::filesystem::path outFile{ "binaryOutput.csv" };
 	BinaryClassificationWriter::writeCsv(outFile, dataSet.testData, pipeline);
@@ -72,14 +79,13 @@ void runLinearRegression(Logger& logger) {
 	static_assert(std::is_floating_point_v<T>,
 		"runLinearRegression requires floating point data mode!");
 
-	const std::filesystem::path datasetPath = "lineardata.csv";
+	const std::filesystem::path dataFile = "lineardata.csv";
 
 	ScopedBenchmarkTimer benchmark(logger, "runLinearRegression");
 
 	logger.info() << "Linear regression pipeline started.";
 
-	const std::filesystem::path dataFile{ datasetPath };
-	logger.info() << "Loading dataset from " << dataFile;
+	logger.info() << "Loading dataset from " << dataFile.string();
 
 	auto samples = CsvDataLoader::load<T>(dataFile);
 	logger.info() << "Count of data loaded: " << samples.size();
@@ -96,14 +102,21 @@ void runLinearRegression(Logger& logger) {
 	Pipeline pipeline{
 		ZScoreScaler<T>{},
 		BatchGradientDescent<T>{},
-		logger,
 		GradientDescentOptions<T>{
 			.learningRate = T(0.01),
 			.epochs = 100
-		}
+		},
+		ExecutionStrategy<T>{},
+		logger
 	};
 
 	pipeline.fit(dataSet.trainingData);
+
+	const RegressionMetrics testMetrics = pipeline.evaluate(dataSet.testData);
+	logger.info() << "Test MSE: " << testMetrics.mse
+		<< ", RMSE: " << testMetrics.rmse
+		<< ", MAE: " << testMetrics.mae
+		<< ", R-squared: " << testMetrics.rSquared;
 
 	const std::filesystem::path outFile{ "linearOutput.csv" };
 	RegressionOutputWriter::writeCsv(outFile, dataSet.testData, pipeline);
@@ -118,7 +131,7 @@ int main() {
 	Logger logger(LogLevel::Debug);
 
 	try {
-		runBinaryClassification<float>(logger);
+		runBinaryClassification<double>(logger);
 	}
 	catch (const std::exception& error) {
 		logger.critical() << "Binary classification failed!";
@@ -128,7 +141,7 @@ int main() {
 	}
 
 	try {
-		runLinearRegression<float>(logger);
+		runLinearRegression<double>(logger);
 	}
 	catch (const std::exception& error) {
 		logger.critical() << "Linear Regression failed!";

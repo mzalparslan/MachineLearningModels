@@ -1,8 +1,6 @@
 #pragma once
 
-#include "IScalingPolicy.h"
 #include "DataPoint.h"
-#include "ModelParameters.h"
 
 #include <algorithm>
 #include <cmath>
@@ -28,7 +26,7 @@
  * @tparam T Floating-point data mode used for values and calculations.
  */
 template <typename T>
-class MaxAbsoluteScaler final : public IScalingPolicy<T> {
+class MaxAbsoluteScaler {
     static_assert(std::is_floating_point_v<T>,
         "MaxAbsoluteScaler requires floating data mode T!");
 
@@ -41,7 +39,7 @@ public:
      * @throws std::invalid_argument If dataset is empty, has no feature, 
      * contains inconsistent feature counts, or contains non-finite values.
      */
-    void fit(const std::vector<DataPoint<T>>& trainingSet) override {
+    void fit(const std::vector<DataPoint<T>>& trainingSet) {
 		// Reset fitted flag.
         isFitted = false;
 
@@ -96,7 +94,7 @@ public:
 	 * or feature value is NaN or Inf value.
 	 * @throws std::runtime_error Scaled value is NaN or Inf.
      */
-    void transform(std::vector<T>& features) const override {
+    void transform(std::vector<T>& features) const {
         if (false == isFitted) {
             throw std::logic_error(
                 "MaxAbsoluteScaler::transform: Call fit() before transform()!");

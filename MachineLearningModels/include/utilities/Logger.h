@@ -19,6 +19,13 @@ enum class LogLevel {
 
 /**
  * @brief Provides simple non-thread-safe stream-based logging.
+ *
+ * @warning Not safe to call from multiple threads concurrently, including
+ * from within a hypothesis or callback invoked by a model trained with
+ * ExecutionMode::Parallel or ParallelVectorized (see ExecutionStrategy.h)
+ * once that parallelism actually spans the sample loop rather than a
+ * single dot product. Logging from inside such a parallel region is a
+ * data race.
  */
 class Logger {
 private:

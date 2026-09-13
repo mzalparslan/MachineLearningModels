@@ -51,4 +51,11 @@ struct StochasticGradientDescentOptions {
 	bool shuffle = true;
 	// Random seed to be used by Shuffle.
 	std::uint32_t randomSeed = 42;
+	// Learning-rate decay applied per epoch: effectiveRate =
+	// learningRate / (1 + decay * epoch). Zero (default) disables decay,
+	// so SGD uses a fixed learning rate as before. Without decay, SGD's
+	// fixed step size makes it oscillate around the optimum rather than
+	// settling into it; a small positive decay lets later epochs take
+	// smaller, more precise steps.
+	T decay = T(0);
 };

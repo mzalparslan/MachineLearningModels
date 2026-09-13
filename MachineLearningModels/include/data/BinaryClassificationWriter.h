@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 /**
@@ -29,7 +30,7 @@ public:
      * @param pipeline Fitted binary-classification pipeline.
      * @param threshold Minimum probability required for the positive class.
      *
-     * @throws std::invalid_argument If threshold is invalid.
+     * @throws std::invalid_argument If testData is empty or threshold is invalid.
      * @throws std::runtime_error If the output file cannot be opened or written.
      */
     template <typename T, typename Pipeline>
@@ -39,12 +40,21 @@ public:
         const Pipeline& pipeline,
         T threshold = T(0.5))
     {
+        static_assert(
+            std::is_floating_point_v<T>,
+            "BinaryClassificationWriter requires a floating-point mode!");
+
+        if (true == testData.empty()) {
+            throw std::invalid_argument(
+                "BinaryClassificationWriter: Test data is empty.");
+        }
+
         if (false == std::isfinite(threshold) ||
-            threshold < T(0) ||
-            threshold > T(1)) {
+            threshold <= T(0) ||
+            threshold >= T(1)) {
             throw std::invalid_argument(
                 "BinaryClassificationWriter: "
-                "Threshold must be finite and within [0, 1].");
+                "Threshold must be between zero and one!");
         }
 
         std::ofstream output{ filePath };
@@ -65,9 +75,13 @@ public:
             // Calculate the probability once to avoid scaling twice.
             const T probability = pipeline.predict(dataPoint.features);
 
-            const bool predictedClass = probability >= threshold;
+            // Classify through the pipeline rather than comparing
+            // probability >= threshold here: the decision rule belongs to
+            // the model, and reimplementing it in the writer would mean
+            // the two silently drift if that rule ever changes.
+            const bool predictedClass = pipeline.classify(probability, threshold);
 
-            const bool expectedClass = dataPoint.target == T(1);
+            const bool expectedClass = dataPoint.target >= threshold;
 
             const bool correct = predictedClass == expectedClass;
 

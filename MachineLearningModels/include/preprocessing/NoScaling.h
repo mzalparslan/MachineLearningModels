@@ -1,9 +1,8 @@
 #pragma once
 
-#include "IScalingPolicy.h"
 #include "DataPoint.h"
-#include "ModelParameters.h"
 
+#include <type_traits>
 #include <vector>
 
 /**
@@ -15,7 +14,7 @@
  * @tparam T Feature value mode.
  */
 template <typename T>
-class NoScaling final : public IScalingPolicy<T> {
+class NoScaling {
     static_assert(std::is_floating_point_v<T>,
         "NoScaling requires floating data mode T!");
 public:
@@ -24,7 +23,7 @@ public:
      *
      * @param trainingSet Unused training dataset.
      */
-    void fit(const std::vector<DataPoint<T>>&) override {
+    void fit(const std::vector<DataPoint<T>>&) {
         // No fitting required.
     }
 
@@ -33,7 +32,7 @@ public:
      *
      * @param features Feature vector intentionally left unchanged.
      */
-    void transform(std::vector<T>&) const override {
+    void transform(std::vector<T>&) const {
         // No transformation required.
     }
 };

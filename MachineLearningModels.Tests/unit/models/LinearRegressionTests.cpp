@@ -53,3 +53,27 @@ TEST(LinearRegressionTest, FitEmptyDatasetThrows) {
 
     EXPECT_THROW(model.fit(emptySet), std::invalid_argument);
 }
+
+TEST(LinearRegressionTest, ParametersExposeLearnedWeightsAndBias) {
+    BatchGradientDescent<double> optimizer;
+    GradientDescentOptions<double> options;
+    options.learningRate = 0.05;
+    options.epochs = 2000;
+
+    LinearRegression<double, BatchGradientDescent<double>> model(optimizer, options);
+
+    // y = 2x + 1
+    std::vector<DataPoint<double>> trainingSet = {
+        DataPoint<double>{ { 1.0 }, 3.0 },
+        DataPoint<double>{ { 2.0 }, 5.0 },
+        DataPoint<double>{ { 3.0 }, 7.0 },
+        DataPoint<double>{ { 4.0 }, 9.0 }
+    };
+
+    model.fit(trainingSet);
+
+    const ModelParameters<double>& parameters = model.parameters();
+    ASSERT_EQ(parameters.weights.size(), 1u);
+    EXPECT_NEAR(parameters.weights[0], 2.0, 1e-1);
+    EXPECT_NEAR(parameters.bias, 1.0, 1e-1);
+}

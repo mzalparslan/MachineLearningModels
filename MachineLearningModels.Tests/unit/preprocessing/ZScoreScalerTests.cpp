@@ -51,3 +51,29 @@ TEST(ZScoreScalerTest, NaNFeatureInFitThrows) {
     };
     EXPECT_THROW(scaler.fit(dataset), std::invalid_argument);
 }
+
+TEST(ZScoreScalerTest, TransformReusesTrainingStatisticsForOutOfDistributionRow) {
+    ZScoreScaler<double> scaler;
+
+    // Training set: mean = 10, sigma = sqrt(((9-10)^2+(10-10)^2+(11-10)^2)/3)
+    //             = sqrt(2/3).
+    std::vector<DataPoint<double>> trainingData = {
+        DataPoint<double>{ { 9.0 }, 0.0 },
+        DataPoint<double>{ { 10.0 }, 0.0 },
+        DataPoint<double>{ { 11.0 }, 0.0 }
+    };
+    scaler.fit(trainingData);
+
+    // A row far outside the training distribution. If transform() leaked
+    // test data (re-derived statistics from this row instead of reusing
+    // the fitted training mean/sigma), a single value has zero spread and
+    // would collapse to 0; reusing the training statistics instead
+    // produces a large, precisely predictable value.
+    std::vector<double> testFeatures = { 1000.0 };
+    scaler.transform(testFeatures);
+
+    const double trainingSigma = std::sqrt(2.0 / 3.0);
+    const double expected = (1000.0 - 10.0) / trainingSigma;
+
+    EXPECT_NEAR(testFeatures[0], expected, 1e-6);
+}

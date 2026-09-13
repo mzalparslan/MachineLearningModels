@@ -81,6 +81,12 @@
     <ClInclude Include="include\optimization\BatchGradientDescent.h">
       <Filter>Header Files\optimization</Filter>
     </ClInclude>
+    <ClInclude Include="include\optimization\GradientDescentValidation.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optimization\OptimizationPolicy.h">
+      <Filter>Header Files\optimization</Filter>
+    </ClInclude>
     <ClInclude Include="include\optimization\MiniBatchGradientDescent.h">
       <Filter>Header Files\optimization</Filter>
     </ClInclude>
@@ -96,7 +102,7 @@
     <ClInclude Include="include\pipelines\RegressionPipeline.h">
       <Filter>Header Files\pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="include\preprocessing\IScalingPolicy.h">
+    <ClInclude Include="include\preprocessing\ScalingPolicy.h">
       <Filter>Header Files\preprocessing</Filter>
     </ClInclude>
     <ClInclude Include="include\preprocessing\MaxAbsoluteScaler.h">
@@ -120,7 +126,7 @@
     <ClInclude Include="include\utilities\Logger.h">
       <Filter>Header Files\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="include\models\BaseRegressionModel.h">
+    <ClInclude Include="include\models\BaseLinearModel.h">
       <Filter>Header Files\models</Filter>
     </ClInclude>
     <ClInclude Include="include\models\ExecutionStrategy.h">

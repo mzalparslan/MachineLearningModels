@@ -1,17 +1,19 @@
 #pragma once
 
 #include "DataPoint.h"
+#include "GradientDescentValidation.h"
 #include "ModelParameters.h"
 #include "options.h"
 
-#include <vector>
-#include <cmath>
-#include <functional>
 #include <algorithm>
+#include <cmath>
+#include <concepts>
+#include <functional>
 #include <numeric>
 #include <random>
 #include <stdexcept>
 #include <type_traits>
+#include <vector>
 
 /**
  * @brief Optimizes model parameters using Mini-Batch Gradient Descent.
@@ -20,7 +22,7 @@
  * parameters after processing each batch. DataPoint indices can be
  * shuffled before each epoch without modifying original dataset.
  *
- * Hypothesis must produce an output for which loss gradient 
+ * Hypothesis must produce an output for which loss gradient
  * with respect to the linear output is:
  *
  * @f[
@@ -41,11 +43,22 @@ struct MiniBatchGradientDescent {
 		std::is_floating_point_v<T>,
 		"MiniBatchGradientDescent requires a floating-point mode.");
 
+	// Kept as an alias for backward compatibility: optimize() itself now
+	// accepts any invocable hypothesis (see the template parameter below),
+	// so a plain lambda is passed directly and dispatched without the
+	// indirect call std::function requires. Retained so callers may still
+	// hold a hypothesis in a std::function when type erasure is wanted.
 	using Hypothesis = std::function<T(
 		const std::vector<T>& features,
 		const ModelParameters<T>& modelParameters)>;
 
 	using Options = MiniBatchGradientDescentOptions<T>;
+
+	// Invoked at the end of each epoch with the epoch index and the mean
+	// squared residual over that epoch (see BatchGradientDescent::EpochCallback
+	// for why this is a generic residual metric rather than the model's
+	// own loss).
+	using EpochCallback = std::function<void(std::size_t epoch, T cost)>;
 
 public:
 	/**
@@ -59,29 +72,44 @@ public:
 	 * @param options Common gradient-descent settings and mini-batch
 	 * configuration.
 	 * @param modelParameters Model parameters modified during optimization.
-	 * @param predict Function that calculates model output using 
+	 * @param predict Function that calculates model output using
 	 * supplied features and current model parameters.
+	 * @param onEpochEnd Optional callback invoked after each epoch with
+	 * the epoch index and mean squared residual.
 	 *
 	 * @throws std::invalid_argument If prediction function is empty,
-	 * options are invalid, training set is invalid, or 
+	 * options are invalid, training set is invalid, or
 	 * model parameters are inconsistent.
 	 * @throws std::runtime_error If optimizer calculates non-finite value.
 	 *
 	 * @note If an exception occurs, modelParameters may contain updates
 	 * completed before failure.
 	 */
-	void optimize(const std::vector<DataPoint<T>>& trainingSet, 
+	template <std::invocable<const std::vector<T>&, const ModelParameters<T>&> Hypothesis_>
+	void optimize(const std::vector<DataPoint<T>>& trainingSet,
 		const Options& options,
-		ModelParameters<T>& modelParameters, 
-		const Hypothesis& predict) {
+		ModelParameters<T>& modelParameters,
+		const Hypothesis_& predict,
+		const EpochCallback& onEpochEnd = nullptr) {
 
-		if (false == static_cast<bool>(predict)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Hypothesis function is not valid!");
+		// std::function has an explicit bool conversion signalling an
+		// empty target; a plain lambda or function object has no such
+		// state, so this check only applies when the caller passed a
+		// Hypothesis (rather than some other invocable, like a lambda).
+		if constexpr (std::same_as<Hypothesis_, Hypothesis>) {
+			if (false == static_cast<bool>(predict)) {
+				throw std::invalid_argument(
+					"MiniBatchGradientDescent: Hypothesis function is not valid!");
+			}
 		}
 
-		validateOptions(options);
-		validateTrainingSet(trainingSet);
+		using Validation = detail::GradientDescentValidation<T>;
+		Validation::validateOptions(options.gradientOptions, "MiniBatchGradientDescent");
+		if (0 == options.batchSize) {
+			throw std::invalid_argument(
+				"MiniBatchGradientDescent: Batch size must be greater than zero!");
+		}
+		Validation::validateTrainingSet(trainingSet, "MiniBatchGradientDescent");
 
 		const std::size_t sampleCount = trainingSet.size();
 		const T sampleCountT = static_cast<T>(sampleCount);
@@ -91,7 +119,8 @@ public:
 		}
 
 		const std::size_t featureCount = trainingSet.front().features.size();
-		validateModelParameters(modelParameters, featureCount);
+		Validation::validateModelParameters(
+			modelParameters, featureCount, "MiniBatchGradientDescent");
 
 		const auto& gradientOptions = options.gradientOptions;
 
@@ -111,17 +140,25 @@ public:
 				std::shuffle(sampleIndices.begin(), sampleIndices.end(), randomGenerator);
 			}
 
+			T sumSquaredError = T(0);
+
 			for (std::size_t batchIdx = 0; batchIdx < sampleCount; batchIdx += batchSize) {
 				// Final batch may contain fewer samples.
-				const std::size_t currentBatchSize = 
+				const std::size_t currentBatchSize =
 					std::min(batchSize, sampleCount - batchIdx);
 				const T batchSizeT = static_cast<T>(currentBatchSize);
-				
+
 				// Reset accumulated gradients for the new batch.
 				weightGradients.assign(featureCount, T(0));
 				biasGradient = T(0);
 
-				// Accumulate gradients over the current mini-batch.
+				// Accumulate gradients over the current mini-batch. Weight
+				// gradients are not checked for finiteness per feature per
+				// sample here: a non-finite partial sum can only arise from
+				// non-finite inputs, which validateTrainingSet already
+				// rejected up front, so one check after the full batch
+				// accumulation (below) catches it just as reliably without
+				// paying a branch per feature per sample.
 				for (std::size_t k = 0; k < currentBatchSize; k++) {
 					const auto& sample = trainingSet[sampleIndices[batchIdx + k]];
 
@@ -139,20 +176,26 @@ public:
 							"MiniBatchGradientDescent: Error is NaN or Inf!");
 					}
 
+					sumSquaredError += error * error;
+
 					biasGradient += error;
-					if (false == std::isfinite(biasGradient)) {
-						throw std::runtime_error(
-							"MiniBatchGradientDescent: Bias gradient is NaN or Inf!");
-					}
 
 					// Accumulate dJ/db for current sample.
 					for (std::size_t j = 0; j < featureCount; j++) {
 						// Accumulate dJ/dw[j] = error * feature[j].
 						weightGradients[j] += error * sample.features[j];
-						if (false == std::isfinite(weightGradients[j])) {
-							throw std::runtime_error(
-								"MiniBatchGradientDescent: Weight gradient is NaN or Inf!");
-						}
+					}
+				}
+
+				if (false == std::isfinite(biasGradient)) {
+					throw std::runtime_error(
+						"MiniBatchGradientDescent: Bias gradient is NaN or Inf!");
+				}
+
+				for (std::size_t j = 0; j < featureCount; j++) {
+					if (false == std::isfinite(weightGradients[j])) {
+						throw std::runtime_error(
+							"MiniBatchGradientDescent: Weight gradient is NaN or Inf!");
 					}
 				}
 
@@ -164,14 +207,15 @@ public:
 				}
 
 				// Add L2 regularization gradient for the bias.
-				if (true == gradientOptions.regularizeBias && gradientOptions.lambda != T(0)) {
-					biasGradient += (gradientOptions.lambda / sampleCountT) * modelParameters.bias;
+				if (true == gradientOptions.regularizeBias && gradientOptions.lambda > T(0)) {
+					biasGradient = Validation::regularize(
+						biasGradient, gradientOptions.lambda, modelParameters.bias, sampleCountT);
 					if (false == std::isfinite(biasGradient)) {
 						throw std::runtime_error(
 							"MiniBatchGradientDescent: Bias gradient regularization is NaN or Inf!");
 					}
 				}
-				
+
 				// Apply bias update.
 				modelParameters.bias -= gradientOptions.learningRate * biasGradient;
 				if (false == std::isfinite(modelParameters.bias)) {
@@ -192,9 +236,11 @@ public:
 					// while other approaches directly using lambda * alpha.
 					// For mini-batch it is often common to use (lambda * alpha) directly.
 					// or normalize by batch size instead of m.
-					// As our cost function is using m, GD currenly using same deritative.
-					if (gradientOptions.lambda != T(0)) {
-						weightGradients[j] += (gradientOptions.lambda / sampleCountT) * modelParameters.weights[j];
+					// As our cost function is using m, GD currently using same derivative.
+					if (gradientOptions.lambda > T(0)) {
+						weightGradients[j] = Validation::regularize(
+							weightGradients[j], gradientOptions.lambda,
+							modelParameters.weights[j], sampleCountT);
 						if (false == std::isfinite(weightGradients[j])) {
 							throw std::runtime_error(
 								"MiniBatchGradientDescent: "
@@ -210,99 +256,10 @@ public:
 					}
 				}
 			}
-		}
-	}
 
-private:
-	// Validates optimization options for consistency and correctness.
-	static void validateOptions(const Options& options) {
-		if (false == std::isfinite(options.gradientOptions.learningRate)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Learning rate is NaN or Inf!");
-		}
-
-		if (options.gradientOptions.learningRate <= T(0)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Learning rate must be positive!");
-		}
-
-		if (0 == options.gradientOptions.epochs) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: "
-				"Epochs must be greater than zero!");
-		}
-
-		if (options.gradientOptions.lambda < T(0)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: "
-				"Regularization strength must be non-negative!");
-		}
-
-		if (false == std::isfinite(options.gradientOptions.lambda)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Regularization strength is NaN or Inf!");
-		}
-
-		if (0 == options.batchSize) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Batch size must be greater than zero!");
-		}
-	}
-
-	// Validates model parameters for consistency and correctness.
-	static void validateModelParameters(const ModelParameters<T>& modelParameters,
-		std::size_t featureCount) {
-		if (modelParameters.weights.size() != featureCount) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: "
-				"Model weights size does not match feature count!");
-		}
-
-		if (false == std::isfinite(modelParameters.bias)) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Model bias is NaN or Inf!");
-		}
-
-		for (const T weight : modelParameters.weights) {
-			if (false == std::isfinite(weight)) {
-				throw std::invalid_argument(
-					"MiniBatchGradientDescent: Model weight is NaN or Inf!");
-			}
-		}
-	}
-
-	// Validates training set for consistency and correctness.
-	static void validateTrainingSet(const std::vector<DataPoint<T>>& trainingSet) {
-		if (true == trainingSet.empty()) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Training set is empty!");
-		}
-
-		const std::size_t featureCount = trainingSet.front().features.size();
-		if (0 == featureCount) {
-			throw std::invalid_argument(
-				"MiniBatchGradientDescent: Training set has no features!");
-		}
-
-		for (const auto& sample : trainingSet) {
-			if (sample.features.size() != featureCount) {
-				throw std::invalid_argument(
-					"MiniBatchGradientDescent: "
-					"DataPoint features size does not match feature count!");
-			}
-
-			if (false == std::isfinite(sample.target)) {
-				throw std::invalid_argument(
-					"MiniBatchGradientDescent: DataPoint target is NaN or Inf!");
-			}
-
-			for (const T value : sample.features) {
-				if (false == std::isfinite(value)) {
-					throw std::invalid_argument(
-						"MiniBatchGradientDescent: Feature value is NaN or Inf!");
-				}
+			if (static_cast<bool>(onEpochEnd)) {
+				onEpochEnd(epoch, sumSquaredError / sampleCountT);
 			}
 		}
 	}
 };
-

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "BaseRegressionModel.h"
+#include "BaseLinearModel.h"
+#include "OptimizationPolicy.h"
 
 /**
  * @brief Multiple linear regression model trained by an optimizer.
@@ -19,13 +20,13 @@
  * model calculations.
  * @tparam Optimizer Optimization policy used to update model parameters.
  */
-template <typename T, typename Optimizer>
-class LinearRegression final : public BaseRegressionModel<T, Optimizer> {
+template <typename T, OptimizationPolicy<T> Optimizer>
+class LinearRegression final : public BaseLinearModel<T, Optimizer> {
 
     // Options from Optimizer used to configure optimization process.
     using Options = typename Optimizer::Options;
-    // Validation of training set from BaseRegressionModel.
-    using BaseRegressionModel<T, Optimizer>::validateTrainingSet;
+    // Validation of training set from BaseLinearModel.
+    using BaseLinearModel<T, Optimizer>::validateTrainingSet;
 
 public:
     ~LinearRegression() override = default;
@@ -39,8 +40,8 @@ public:
     explicit LinearRegression(Optimizer optimizer_,
 		Options options_ = {}, 
         ExecutionStrategy<T> executionStrategy_ = {})
-        : BaseRegressionModel<T, Optimizer>(std::move(optimizer_), 
-            std::move(options_), 
+        : BaseLinearModel<T, Optimizer>(std::move(optimizer_),
+            std::move(options_),
             std::move(executionStrategy_)) {
     }
 

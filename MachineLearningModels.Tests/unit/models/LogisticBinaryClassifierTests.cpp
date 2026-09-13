@@ -64,3 +64,18 @@ TEST(LogisticBinaryClassifierTest, ThresholdValidation) {
     EXPECT_THROW(model.predictClass({ 1.0 }, -0.1), std::invalid_argument);
     EXPECT_THROW(model.predictClass({ 1.0 }, 1.1), std::invalid_argument);
 }
+
+TEST(LogisticBinaryClassifierTest, ClassifyAppliesSameRuleAsPredictClass) {
+    // classify() is predictClass()'s decision rule, factored out so a
+    // caller that already has a probability (e.g. a writer that also
+    // reports it) can classify without predicting a second time. It's a
+    // static, model-independent function of (probability, threshold).
+    using Model = LogisticBinaryClassifier<double, BatchGradientDescent<double>>;
+
+    EXPECT_TRUE(Model::classify(0.75, 0.5));
+    EXPECT_FALSE(Model::classify(0.25, 0.5));
+    EXPECT_FALSE(Model::classify(0.75, 0.8));
+
+    EXPECT_THROW(Model::classify(0.5, 0.0), std::invalid_argument);
+    EXPECT_THROW(Model::classify(0.5, 1.0), std::invalid_argument);
+}

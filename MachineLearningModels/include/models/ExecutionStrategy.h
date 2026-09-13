@@ -14,6 +14,18 @@
  * Parallel and vectorized modes permit the standard-library implementation
  * to use the requested execution behavior, but do not guarantee that a
  * particular implementation will use multiple threads or SIMD instructions.
+ *
+ * @warning Parallel and ParallelVectorized parallelize the dot product
+ * itself -- typically 1 to 50 elements for a real model (see
+ * MachineLearningModels.Benchmarks). Thread-pool dispatch costs
+ * microseconds while the dot product costs nanoseconds, so these modes
+ * make training dramatically slower at realistic feature counts, and the
+ * optimizer calls this once per sample per epoch. They only pay off in
+ * the millions-of-elements range the benchmarks also cover. The
+ * parallelism actually worth having is one level up -- accumulating
+ * gradients across samples in the optimizer, where each sample's
+ * contribution is independent and the work per task is real -- but that
+ * is not what these modes do today.
  */
 enum class ExecutionMode {
     // Ordered dot product using std::inner_product.

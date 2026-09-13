@@ -1,8 +1,6 @@
 #pragma once
 
-#include "IScalingPolicy.h"
 #include "DataPoint.h"
-#include "ModelParameters.h"
 
 #include <vector>
 #include <cmath>
@@ -31,7 +29,7 @@
 * 
 */
 template <typename T>
-class MinMaxScaler final : public IScalingPolicy<T> {
+class MinMaxScaler {
 	static_assert(std::is_floating_point_v<T>, 
 		"MinMaxScaler requires floating data mode T!");
 
@@ -80,7 +78,7 @@ public:
 	 * feature value is not valid (NaN or Inf).
 	 * @throws std::runtime_error if scaled value is not valid (NaN or Inf).
 	 */
-	void transform(std::vector<T>& features) const override {
+	void transform(std::vector<T>& features) const {
 		if (false == isFitted) {
 			throw std::logic_error(
 				"MinMaxScaler::transform: "
@@ -128,7 +126,7 @@ public:
 	 * has inconsistent feature sizes or contains non-finite values.
 	 * @throws std::runtime_error if calculated feature range is not finite.
 	 */
-	void fit(const std::vector<DataPoint<T>>& trainingSet) override {
+	void fit(const std::vector<DataPoint<T>>& trainingSet) {
 		isFitted = false;
 
 		if (true == trainingSet.empty()) {
@@ -192,7 +190,9 @@ private:
 	std::vector<T> featureRanges;
 
 	// Default scale is between [0, 1] after normalization.
-	const T targetMin = T(0);
-	const T targetMax = T(1);
-	const T targetScale = targetMax - targetMin;
+	// Non-const so the scaler remains copy- and move-assignable
+	// (a const member would implicitly delete both).
+	T targetMin = T(0);
+	T targetMax = T(1);
+	T targetScale = targetMax - targetMin;
 };

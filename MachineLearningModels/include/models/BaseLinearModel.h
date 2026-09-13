@@ -3,6 +3,7 @@
 #include "IRegressionModel.h"
 #include "ModelParameters.h"
 #include "ExecutionStrategy.h"
+#include "OptimizationPolicy.h"
 #include "options.h"
 
 #include <cmath>
@@ -11,28 +12,45 @@
 #include <vector>
 
 /**
- * @brief Provides shared state and behavior for trainable regression models.
+ * @brief Provides shared state and behavior for trainable linear models.
  *
- * Stores  optimizer, optimizer-specific configuration, learned model
+ * Stores optimizer, optimizer-specific configuration, learned model
  * parameters, and strategy used to calculate linear outputs.
+ *
+ * What LinearRegression and LogisticBinaryClassifier actually share is
+ * "a linear model with weights and a bias" -- not that both are
+ * regression models (a classifier is not a regression model). This base
+ * models that shared shape; IRegressionModel remains the capability
+ * interface for models that predict a continuous target.
  *
  * Derived models remain responsible for implementing fit() and predict().
  *
  * @tparam T Floating-point type used for features, targets, and calculations.
  * @tparam Optimizer Optimizer type used to learn model parameters.
  */
-template <typename T, typename Optimizer>
-class BaseRegressionModel : public IRegressionModel<T> {
+template <typename T, OptimizationPolicy<T> Optimizer>
+class BaseLinearModel : public IRegressionModel<T> {
 protected:
     // Optimizer-specific configuration type.
     using Options = typename Optimizer::Options;
 
-	const ModelParameters<T>& getModelParameters() const {
-		return modelParameters;
-	}
-
 public:
-    virtual ~BaseRegressionModel() = default;
+    virtual ~BaseLinearModel() = default;
+
+    /**
+     * @brief Read-only access to the learned weights and bias.
+     *
+     * For a library whose purpose is learning how these algorithms work,
+     * being able to inspect the fitted coefficients (and compare them to
+     * a closed-form solution) is most of the value.
+     *
+     * @return The model's learned parameters. Only meaningful once fit()
+     * has completed successfully.
+     */
+    [[nodiscard]]
+    const ModelParameters<T>& parameters() const noexcept {
+        return modelParameters;
+    }
 
 protected:
     /**
@@ -43,7 +61,7 @@ protected:
      * @param executionStrategy_ Strategy used to calculate linear outputs
      * during training and prediction.
      */
-    BaseRegressionModel(
+    BaseLinearModel(
         Optimizer optimizer_,
         Options options_ = {},
         ExecutionStrategy<T> executionStrategy_ = {})
@@ -83,7 +101,7 @@ protected:
 
         if (false == std::isfinite(output)) {
             throw std::runtime_error(
-                "BaseRegressionModel::linearOutput: "
+                "BaseLinearModel::linearOutput: "
                 "Output is NaN or Inf!");
         }
 
@@ -106,7 +124,7 @@ protected:
     {
         if (true == trainingSet.empty()) {
             throw std::invalid_argument(
-                "BaseRegressionModel::validateTrainingSet: "
+                "BaseLinearModel::validateTrainingSet: "
                 "Training set is empty!");
         }
 
@@ -115,7 +133,7 @@ protected:
 
         if (0 == expectedFeatureCount) {
             throw std::invalid_argument(
-                "BaseRegressionModel::validateTrainingSet: "
+                "BaseLinearModel::validateTrainingSet: "
                 "Training set has no features!");
         }
 
@@ -123,7 +141,7 @@ protected:
             if (dataPoint.features.size() !=
                 expectedFeatureCount) {
                 throw std::invalid_argument(
-                    "BaseRegressionModel::validateTrainingSet: "
+                    "BaseLinearModel::validateTrainingSet: "
                     "Inconsistent feature count in training set!");
             }
         }
@@ -137,27 +155,35 @@ protected:
      * @throws std::logic_error If the model has not been fitted or its learned
      * parameters are inconsistent.
      * @throws std::invalid_argument If the supplied feature count differs from
-     * the fitted feature count.
+     * the fitted feature count, or a feature is non-finite.
      */
     void validateFeatures(
         const std::vector<T>& features) const
     {
         if (false == isFitted) {
             throw std::logic_error(
-                "BaseRegressionModel::validateFeatures: "
+                "BaseLinearModel::validateFeatures: "
                 "Call fit() before predict()!");
         }
 
         if (features.size() != featureCount) {
             throw std::invalid_argument(
-                "BaseRegressionModel::validateFeatures: "
+                "BaseLinearModel::validateFeatures: "
                 "Feature count mismatch!");
         }
 
         if (modelParameters.weights.size() != featureCount) {
             throw std::logic_error(
-                "BaseRegressionModel::validateFeatures: "
+                "BaseLinearModel::validateFeatures: "
                 "Inconsistent model parameters!");
+        }
+
+        for (const T feature : features) {
+            if (false == std::isfinite(feature)) {
+                throw std::invalid_argument(
+                    "BaseLinearModel::validateFeatures: "
+                    "Feature value is NaN or Inf!");
+            }
         }
     }
 

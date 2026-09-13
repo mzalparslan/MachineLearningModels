@@ -1,11 +1,12 @@
 #pragma once
 
+#include <type_traits>
 #include <vector>
 
 /**
  * @brief Container for parameters used by machine learning models.
  *
- * A Lightweight POD-style struct that holds the learnable parameters 
+ * A Lightweight POD-style struct that holds the learnable parameters
  * (a weight vector and an optional scalar bias)
  * for simple linear models or other models that are expressed with a
  * weight vector plus an intercept.
@@ -15,6 +16,9 @@
  */
 template <typename T>
 struct ModelParameters {
+	static_assert(std::is_floating_point_v<T>,
+		"ModelParameters requires a floating-point mode!");
+
 	/**
 	 * @brief Per-feature weights.
 	 *
@@ -24,7 +28,7 @@ struct ModelParameters {
 	 *   y = dot(weights, x) + bias
 	 *
 	 * @notes For models with complex shapes (matrices, tensors),
-	 * this struct is not suitable. They should they their own data structs.
+	 * this struct is not suitable. They should define their own data structs.
 	 */
 	std::vector<T> weights;
 

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "DataPoint.h"
+#include "GradientDescentValidation.h"
 #include "ModelParameters.h"
 #include "options.h"
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <functional>
 #include <numeric>
 #include <random>
@@ -37,17 +39,26 @@
 template <typename T>
 struct StochasticGradientDescent {
 	// Ensure that the template mode T is floating-point mode.
-	static_assert(std::is_floating_point_v<T>, 
+	static_assert(std::is_floating_point_v<T>,
 		"StochasticGradientDescent requires floating-point data mode!");
 
-	// Declaration for hypothesis method to be used 
-	// to predict output based on features and model parameters.
+	// Kept as an alias for backward compatibility: optimize() itself now
+	// accepts any invocable hypothesis (see the template parameter below),
+	// so a plain lambda is passed directly and dispatched without the
+	// indirect call std::function requires. Retained so callers may still
+	// hold a hypothesis in a std::function when type erasure is wanted.
 	using Hypothesis = std::function<T(
 		const std::vector<T>& features,
 		const ModelParameters<T>& modelParameters)>;
 
 	// Declaration for options to configure SGD optimization.
 	using Options = StochasticGradientDescentOptions<T>;
+
+	// Invoked at the end of each epoch with the epoch index and the mean
+	// squared residual over that epoch (see BatchGradientDescent::EpochCallback
+	// for why this is a generic residual metric rather than the model's
+	// own loss).
+	using EpochCallback = std::function<void(std::size_t epoch, T cost)>;
 
 public:
 	/**
@@ -59,8 +70,10 @@ public:
 	 * @param trainingSet Dataset used to calculate gradients.
 	 * @param options Common options and SGD-specific options.
 	 * @param modelParameters Model parameters modified with optimization.
-	 * @param predict Function that calculates model output using 
+	 * @param predict Function that calculates model output using
 	 * supplied features and current model parameters.
+	 * @param onEpochEnd Optional callback invoked after each epoch with
+	 * the epoch index and mean squared residual.
 	 *
 	 * @throws std::invalid_argument If prediction function is empty,
 	 * options are invalid, training set is inconsistent, or model
@@ -70,23 +83,37 @@ public:
 	 * @note If an exception occurs, modelParameters may contain updates
 	 * completed before failure.
 	 */
-	void optimize(const std::vector<DataPoint<T>>& trainingSet, 
+	template <std::invocable<const std::vector<T>&, const ModelParameters<T>&> Hypothesis_>
+	void optimize(const std::vector<DataPoint<T>>& trainingSet,
 				  const Options& options,
 				  ModelParameters<T>& modelParameters,
-			      const Hypothesis& predict) {
+			      const Hypothesis_& predict,
+				  const EpochCallback& onEpochEnd = nullptr) {
 		const auto& gradientOptions = options.gradientOptions;
 
-		// Control if prediction method is valid.
-		if (false == static_cast<bool>(predict)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Hypothesis method is not valid!");
+		// std::function has an explicit bool conversion signalling an
+		// empty target; a plain lambda or function object has no such
+		// state, so this check only applies when the caller passed a
+		// Hypothesis (rather than some other invocable, like a lambda).
+		if constexpr (std::same_as<Hypothesis_, Hypothesis>) {
+			if (false == static_cast<bool>(predict)) {
+				throw std::invalid_argument(
+					"StochasticGradientDescent: Hypothesis method is not valid!");
+			}
 		}
 
-		validateTrainingSet(trainingSet);
-		validateOptions(options);
+		using Validation = detail::GradientDescentValidation<T>;
+		Validation::validateOptions(gradientOptions, "StochasticGradientDescent");
+		Validation::validateTrainingSet(trainingSet, "StochasticGradientDescent");
+
+		if (false == std::isfinite(options.decay) || options.decay < T(0)) {
+			throw std::invalid_argument(
+				"StochasticGradientDescent: Decay must be non-negative and finite!");
+		}
 
 		const std::size_t featureCount = trainingSet.front().features.size();
-		validateModelParameters(modelParameters, featureCount);
+		Validation::validateModelParameters(
+			modelParameters, featureCount, "StochasticGradientDescent");
 
 		const std::size_t sampleCount = trainingSet.size();
 		const T sampleCountT = static_cast<T>(sampleCount);
@@ -106,6 +133,14 @@ public:
 				std::shuffle(sampleIndices.begin(), sampleIndices.end(), randomGenerator);
 			}
 
+			// Learning-rate decay: later epochs take smaller, more precise
+			// steps instead of oscillating around the optimum forever at a
+			// fixed step size. options.decay == 0 (default) disables this.
+			const T epochLearningRate = gradientOptions.learningRate /
+				(T(1) + options.decay * static_cast<T>(epoch));
+
+			T sumSquaredError = T(0);
+
 			for (const std::size_t sampleIndex : sampleIndices) {
 				const auto& sample = trainingSet[sampleIndex];
 
@@ -121,132 +156,54 @@ public:
 						"StochasticGradientDescent: Error is NaN or Inf!");
 				}
 
+				sumSquaredError += error * error;
+
 				// Update bias (Immediate Update)
 				// b = b - alpha * error
 				T biasGradient = error;
-				if ((true == gradientOptions.regularizeBias) && 
+				if ((true == gradientOptions.regularizeBias) &&
 					(gradientOptions.lambda > T(0))) {
-					biasGradient = biasGradient +
-						(gradientOptions.lambda / sampleCountT) * modelParameters.bias;
+					biasGradient = Validation::regularize(
+						biasGradient, gradientOptions.lambda,
+						modelParameters.bias, sampleCountT);
 					if (false == std::isfinite(biasGradient)) {
 						throw std::runtime_error(
 							"StochasticGradientDescent: Bias gradient is NaN or Inf!");
 					}
 				}
 
-				modelParameters.bias = modelParameters.bias - 
-					gradientOptions.learningRate * biasGradient;
+				modelParameters.bias = modelParameters.bias -
+					epochLearningRate * biasGradient;
 				if (false == std::isfinite(modelParameters.bias)) {
 					throw std::runtime_error(
 						"StochasticGradientDescent: Bias is NaN or Inf!");
 				}
-				
+
 				// Update weights (Immediate Update)
 				// w = w - alpha * error * x
 				for (std::size_t j = 0; j < modelParameters.weights.size(); j++) {
 					T weightGradient =  error * sample.features[j];
 					if (gradientOptions.lambda > T(0)) {
-						weightGradient = weightGradient + 
-							(gradientOptions.lambda / sampleCountT) * modelParameters.weights[j];
+						weightGradient = Validation::regularize(
+							weightGradient, gradientOptions.lambda,
+							modelParameters.weights[j], sampleCountT);
 					}
 					if (false == std::isfinite(weightGradient)) {
 						throw std::runtime_error(
 							"StochasticGradientDescent: Weight gradient is NaN or Inf!");
 					}
 
-					modelParameters.weights[j] = modelParameters.weights[j] - 
-						gradientOptions.learningRate * weightGradient;
+					modelParameters.weights[j] = modelParameters.weights[j] -
+						epochLearningRate * weightGradient;
 					if (false == std::isfinite(modelParameters.weights[j])) {
 						throw std::runtime_error(
 							"StochasticGradientDescent: Weight is NaN or Inf!");
 					}
 				}
 			}
-		}
-	}
 
-private:
-	// Validates training data structure and values.
-	static void validateTrainingSet(const std::vector<DataPoint<T>>& trainingSet) {
-		if (true == trainingSet.empty()) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Training set has no samples!");
-		}
-
-		const std::size_t featureCount = trainingSet.front().features.size();
-		if (0 == featureCount) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Training set has no features!");
-		}
-
-		for (const auto& sample : trainingSet) {
-			if (sample.features.size() != featureCount) {
-				throw std::invalid_argument(
-					"StochasticGradientDescent: "
-					"Inconsistent feature count in training set!");
-			}
-
-			if (false == std::isfinite(sample.target)) {
-				throw std::invalid_argument(
-					"StochasticGradientDescent: DataPoint target is NaN or Inf!");
-			}
-
-			for (const T value : sample.features) {
-				if (false == std::isfinite(value)) {
-					throw std::invalid_argument(
-						"StochasticGradientDescent: Feature value is NaN or Inf!");
-				}
-			}
-		}
-	}
-
-	// Validates optimization options for consistency and correctness.
-	static void validateOptions(const Options& options) {
-		const auto& gradientOptions = options.gradientOptions;
-
-		if (gradientOptions.learningRate <= T(0)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Learning rate must be positive!");
-		}
-
-		if (false == std::isfinite(gradientOptions.learningRate)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Learning rate is NaN or Inf!");
-		}
-
-		if (0 == gradientOptions.epochs) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Epochs must be greater than zero!");
-		}
-
-		if (gradientOptions.lambda < T(0)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Regularization strength must be non-negative!");
-		}
-
-		if (false == std::isfinite(gradientOptions.lambda)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Regularization strength is NaN or Inf!");
-		}
-	}
-
-	// Validates model parameters for consistency and correctness.
-	static void validateModelParameters(const ModelParameters<T>& modelParameters,
-		std::size_t featureCount) {
-		if (modelParameters.weights.size() != featureCount) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Model weights size does not match feature count!");
-		}
-
-		if (false == std::isfinite(modelParameters.bias)) {
-			throw std::invalid_argument(
-				"StochasticGradientDescent: Model bias is NaN or Inf!");
-		}
-
-		for (const T weight : modelParameters.weights) {
-			if (false == std::isfinite(weight)) {
-				throw std::invalid_argument(
-					"StochasticGradientDescent: Model weight is NaN or Inf!");
+			if (static_cast<bool>(onEpochEnd)) {
+				onEpochEnd(epoch, sumSquaredError / sampleCountT);
 			}
 		}
 	}

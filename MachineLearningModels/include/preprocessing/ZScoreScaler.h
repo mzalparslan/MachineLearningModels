@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IScalingPolicy.h"
+#include "DataPoint.h"
 
 #include <vector>
 #include <cmath>
@@ -25,7 +25,7 @@
  *
  */
 template <typename T>
-class ZScoreScaler final : public IScalingPolicy<T> {
+class ZScoreScaler {
 	static_assert(std::is_floating_point_v<T>,
 		"ZScoreScaler requires floating data mode T!");
 
@@ -40,7 +40,7 @@ public:
 	* @throws std::runtime_error If calculated mean, variance 
 	* or standard deviation is non-finite.
 	*/
-	void fit(const std::vector<DataPoint<T>>& trainingSet) override {
+	void fit(const std::vector<DataPoint<T>>& trainingSet) {
 		// Reset flag.
 		isFitted = false;
 
@@ -62,6 +62,12 @@ public:
 		featureMeans.assign(featureCount, T(0));
 		featureSigma.assign(featureCount, T(0));
 
+		// Accumulate in long double rather than T: with T = float and a large
+		// example count, a running sum in T grows until each new addend
+		// falls below the accumulator's ULP and is silently dropped, biasing
+		// the mean. Only narrow back to T once the statistic is final.
+		std::vector<long double> means(featureCount, 0.0L);
+
 		// Accumulate feature values for mean calculation.
 		for (const auto& example : trainingSet) {
 			if (example.features.size() != featureCount) {
@@ -75,9 +81,9 @@ public:
 						"ZScoreScaler::fit: Feature value is NaN or Inf!");
 				}
 				// Accumulate sum for mean calculation.
-				featureMeans[j] += example.features[j];
+				means[j] += static_cast<long double>(example.features[j]);
 
-				if (false == std::isfinite(featureMeans[j])) {
+				if (false == std::isfinite(means[j])) {
 					throw std::runtime_error(
 						"ZScoreScaler::fit: Accumulated feature sum is NaN or Inf!");
 				}
@@ -85,25 +91,27 @@ public:
 		}
 
 		// Each feature's average is based on total count of training examples.
-		const T exampleCountT = static_cast<T>(exampleCount);
+		const long double exampleCountLD = static_cast<long double>(exampleCount);
 		for (std::size_t j = 0; j < featureCount; j++) {
-			featureMeans[j] /= exampleCountT;
+			means[j] /= exampleCountLD;
 
-			if (false == std::isfinite(featureMeans[j])) {
+			if (false == std::isfinite(means[j])) {
 				throw std::runtime_error(
 					"ZScoreScaler::fit: Calculated mean is NaN or Inf!");
 			}
 		}
 
 		// Accumulate squared differences for variance calculation.
+		std::vector<long double> sumSquaredDiffs(featureCount, 0.0L);
 		for (const auto& example : trainingSet) {
 			for (std::size_t j = 0; j < featureCount; j++) {
 				// Difference between the feature value and its mean.
-				const T diff = (example.features[j] - featureMeans[j]);
+				const long double diff =
+					static_cast<long double>(example.features[j]) - means[j];
 				// Add squared difference to feature accumulator.
-				featureSigma[j] += (diff * diff);
+				sumSquaredDiffs[j] += (diff * diff);
 
-				if (false == std::isfinite(featureSigma[j])) {
+				if (false == std::isfinite(sumSquaredDiffs[j])) {
 					throw std::runtime_error(
 						"ZScoreScaler::fit: "
 						"Accumulated squared difference is NaN or Inf!");
@@ -113,23 +121,23 @@ public:
 
 		// Calculate population variance and standard deviation for each feature.
 		for (std::size_t j = 0; j < featureCount; j++) {
-			const T variance = featureSigma[j] / exampleCountT;
+			const long double variance = sumSquaredDiffs[j] / exampleCountLD;
 			if (false == std::isfinite(variance)) {
 				throw std::runtime_error(
 					"ZScoreScaler::fit: Calculated variance is NaN or Inf!");
 			}
 
-			featureSigma[j] = std::sqrt(variance);
-			if (false == std::isfinite(featureSigma[j])) {
+			const long double sigma = std::sqrt(variance);
+			if (false == std::isfinite(sigma)) {
 				throw std::runtime_error(
 					"ZScoreScaler::fit: Calculated sigma is NaN or Inf!");
 			}
 
+			featureMeans[j] = static_cast<T>(means[j]);
+
 			// Replace zero standard deviation with one to avoid division by zero.
 			// The constant value observed during fitting will map to zero.
-			if (T(0) == featureSigma[j]) {
-				featureSigma[j] = T(1);
-			}
+			featureSigma[j] = (0.0L == sigma) ? T(1) : static_cast<T>(sigma);
 		}
 
 		// Set fitted flag to true after successful fitting.
@@ -146,7 +154,7 @@ public:
 	* or an input feature is non-finite.
 	* @throws std::runtime_error If scaling produces non-finite value.
 	*/
-	void transform(std::vector<T>& features) const override {
+	void transform(std::vector<T>& features) const {
 		if (false == isFitted) {
 			throw std::logic_error(
 				"ZScoreScaler::transform: "

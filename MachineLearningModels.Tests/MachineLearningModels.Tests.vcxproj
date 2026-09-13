@@ -148,11 +148,14 @@
     <ClCompile Include="unit\data\DataSplitterTests.cpp" />
     <ClCompile Include="unit\data\RegressionOutputWriterTests.cpp" />
     <ClCompile Include="unit\metrics\BenchmarkTimerTests.cpp" />
+    <ClCompile Include="unit\metrics\MetricsTests.cpp" />
     <ClCompile Include="unit\metrics\ScopedBenchmarkTimerTests.cpp" />
+    <ClCompile Include="unit\models\ExecutionStrategyTests.cpp" />
     <ClCompile Include="unit\models\LinearRegressionTests.cpp" />
     <ClCompile Include="unit\models\LogisticBinaryClassifierTests.cpp" />
     <ClCompile Include="unit\optimization\BatchGradientDescentTests.cpp" />
     <ClCompile Include="unit\optimization\MiniBatchGradientDescentTests.cpp" />
+    <ClCompile Include="unit\optimization\OptimizerAgreementTests.cpp" />
     <ClCompile Include="unit\optimization\StochasticGradientDescentTests.cpp" />
     <ClCompile Include="unit\pipelines\BinaryClassificationPipelineTests.cpp" />
     <ClCompile Include="unit\pipelines\RegressionPipelineTests.cpp" />

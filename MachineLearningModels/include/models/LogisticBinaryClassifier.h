@@ -1,6 +1,7 @@
 #pragma once
 
-#include "BaseRegressionModel.h"
+#include "BaseLinearModel.h"
+#include "OptimizationPolicy.h"
 
 /**
  * @brief Logistic Regression for binary classification.
@@ -26,15 +27,15 @@
  * 
  * @tparam Optimizer Optimization policy used to learn model parameters.
  */
-template <typename T, typename Optimizer>
-class LogisticBinaryClassifier final : public BaseRegressionModel<T, Optimizer> {
+template <typename T, OptimizationPolicy<T> Optimizer>
+class LogisticBinaryClassifier final : public BaseLinearModel<T, Optimizer> {
 
 	// Options from Optimizer used to configure optimization process.
 	using Options = typename Optimizer::Options;
-	// Linear output (logit) calculation from BaseRegressionModel.
-	using BaseRegressionModel<T, Optimizer>::linearOutput;
-	// Validation of training set from BaseRegressionModel.
-	using BaseRegressionModel<T, Optimizer>::validateTrainingSet;
+	// Linear output (logit) calculation from BaseLinearModel.
+	using BaseLinearModel<T, Optimizer>::linearOutput;
+	// Validation of training set from BaseLinearModel.
+	using BaseLinearModel<T, Optimizer>::validateTrainingSet;
 
 public:
 	/**
@@ -47,7 +48,7 @@ public:
 	explicit LogisticBinaryClassifier(Optimizer optimizer_, 
 		Options options_ = {}, 
 		ExecutionStrategy<T> executionStrategy_ = {})
-		: BaseRegressionModel<T, Optimizer>(std::move(optimizer_), 
+		: BaseLinearModel<T, Optimizer>(std::move(optimizer_),
 			std::move(options_), 
 			std::move(executionStrategy_)) {
 	}
@@ -134,21 +135,46 @@ public:
 	 *
 	 * @throws std::logic_error Caller didnot call fit() before prediction.
 	 * @throws std::invalid_argument If threshold is non-finite or
-	 * outside the open interval (0, 1), feature count is incorrect, 
+	 * outside the open interval (0, 1), feature count is incorrect,
 	 * or an input feature is non-finite.
 	 * @throws std::runtime_error If calculated logit is non-finite value.
 	 */
 	[[nodiscard]]
 	bool predictClass(const std::vector<T>& features, T threshold = T(0.5)) const {
+		return classify(predict(features), threshold);
+	}
+
+	/**
+	 * @brief Classifies an already-computed probability against a threshold.
+	 *
+	 * This is the decision rule predictClass() applies after calling
+	 * predict() -- exposed separately so a caller that already has the
+	 * probability in hand (e.g. to also report it, as
+	 * BinaryClassificationWriter and BinaryClassificationPipeline::evaluate
+	 * do) can classify it without a second, redundant scale-and-predict
+	 * pass, while still going through the same rule as predictClass()
+	 * rather than re-implementing it.
+	 *
+	 * @param probability Positive-class probability, normally from predict().
+	 * @param threshold Probability threshold for selecting class 1.
+	 *
+	 * @return true if probability is greater than or equal to threshold;
+	 * otherwise false.
+	 *
+	 * @throws std::invalid_argument If threshold is non-finite or outside
+	 * the open interval (0, 1).
+	 */
+	[[nodiscard]]
+	static bool classify(T probability, T threshold = T(0.5)) {
 		if (false == std::isfinite(threshold) ||
 			threshold <= T(0) ||
 			threshold >= T(1)) {
 			throw std::invalid_argument(
-				"LogisticBinaryClassifier::predict: "
+				"LogisticBinaryClassifier::classify: "
 				"Threshold must be between zero and one!");
 		}
 
-		return predict(features) >= threshold;
+		return probability >= threshold;
 	}
 
 private:

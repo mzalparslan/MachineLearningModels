@@ -52,7 +52,6 @@ TestResults/
 test_detail.xml
 
 # NuGet packages restored during build
-packages/
 *.nupkg
 
 # Generated prediction files

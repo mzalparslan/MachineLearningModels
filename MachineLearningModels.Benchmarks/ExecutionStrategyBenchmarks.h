@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ExecutionStrategy.h"
 #include "ModelParameters.h"
 
@@ -5,6 +7,7 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -30,7 +33,7 @@ void benchmarkStrategy(
 	
     const std::size_t minWarmupIterations = 5;
 	const std::size_t warmupIterations =
-		std::max<std::size_t>(minWarmupIterations, iterations);
+		std::min<std::size_t>(minWarmupIterations, iterations);
 
     // Warm up caches and parallel execution infrastructure.
     for (std::size_t i = 0; i < warmupIterations; i++) {
@@ -103,7 +106,7 @@ void runBenchmarks(std::size_t featureCount)
 	const std::size_t calculatedIterations = 
         static_cast<std::size_t>(targetElementOperations / featureCount);
 
-    // Process approximately ten million elements per strategy.
+    // Process approximately one billion elements per strategy.
     const std::size_t iterations =
         std::max<std::size_t>(
             minimumIterations,
