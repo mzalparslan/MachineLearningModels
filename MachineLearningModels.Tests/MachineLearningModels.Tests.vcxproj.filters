@@ -14,6 +14,12 @@
     <ClCompile Include="unit\metrics\MetricsTests.cpp">
       <Filter>unit\metrics</Filter>
     </ClCompile>
+    <ClCompile Include="unit\models\BasicNeuralNetworkTests.cpp">
+      <Filter>unit\models</Filter>
+    </ClCompile>
+    <ClCompile Include="unit\models\DeepNeuralNetworkTests.cpp">
+      <Filter>unit\models</Filter>
+    </ClCompile>
     <ClCompile Include="unit\models\ExecutionStrategyTests.cpp">
       <Filter>unit\models</Filter>
     </ClCompile>

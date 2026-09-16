@@ -7,17 +7,9 @@
 #include <vector>
 
 /**
- * @brief Contract a scaling policy must satisfy: 
+ * @brief Concept a scaling policy must satisfy following requirements:
  * - fit() learns parameters from a training set, 
  * - transform() applies them in place.
- *
- * RegressionPipeline and BinaryClassificationPipeline are templates, so
- * the scaler they use is dispatched statically -- constraining their
- * Scaler parameter with this concept turns a mismatched scaler into a
- * readable concept error at the call site, with no runtime cost, instead
- * of a wall of template-instantiation diagnostics or a vtable neither
- * pipeline ever needs.
- *
  */
 template <typename S, typename T>
 concept ScalingPolicy = std::is_floating_point_v<T> &&

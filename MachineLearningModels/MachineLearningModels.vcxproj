@@ -156,11 +156,14 @@
     <ClInclude Include="include\metrics\metrics.h" />
     <ClInclude Include="include\metrics\ScopedBenchmarkTimer.h" />
     <ClInclude Include="include\models\BaseLinearModel.h" />
+    <ClInclude Include="include\models\BasicNeuralNetwork.h" />
+    <ClInclude Include="include\models\DeepNeuralNetwork.h" />
     <ClInclude Include="include\models\ExecutionStrategy.h" />
     <ClInclude Include="include\models\IRegressionModel.h" />
     <ClInclude Include="include\models\LinearRegression.h" />
     <ClInclude Include="include\models\LogisticBinaryClassifier.h" />
     <ClInclude Include="include\models\ModelParameters.h" />
+    <ClInclude Include="include\models\NeuralNetworkOptions.h" />
     <ClInclude Include="include\optimization\BatchGradientDescent.h" />
     <ClInclude Include="include\optimization\GradientDescentValidation.h" />
     <ClInclude Include="include\optimization\MiniBatchGradientDescent.h" />
@@ -176,6 +179,7 @@
     <ClInclude Include="include\preprocessing\NoScaling.h" />
     <ClInclude Include="include\preprocessing\RobustScaler.h" />
     <ClInclude Include="include\preprocessing\ZScoreScaler.h" />
+    <ClInclude Include="include\utilities\ActivationFunctions.h" />
     <ClInclude Include="include\utilities\Logger.h" />
   </ItemGroup>
   <ItemGroup>
