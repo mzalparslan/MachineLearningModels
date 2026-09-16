@@ -1,10 +1,10 @@
 # MachineLearningModels
 
-MachineLearningModels is an educational C++20 project that implements core
+MachineLearningModels is an educational C++ project that implements core
 machine-learning algorithms without relying on a machine-learning framework.
 It demonstrates feature preprocessing, gradient-descent optimization, linear
-regression, logistic binary classification, data loading, evaluation output,
-and automated testing.
+regression, logistic binary classification, neural networks, data loading,
+evaluation output, and automated testing.
 
 Repository contains four projects:
 
@@ -54,11 +54,16 @@ then reused to transform prediction and test data, preventing data leakage.
 
 - Multiple linear regression
 - Logistic binary classification
+- BasicNeuralNetwork — a two-layer (one hidden layer) sigmoid network
+- DeepNeuralNetwork — a feedforward sigmoid network with an arbitrary
+  number of layers, trained by per-sample backpropagation
 - Regression pipeline combining a scaler, optimizer, and model
 - Binary-classification pipeline combining a scaler, optimizer, and model
 
 ### Supporting Components
 
+- Activation functions and derivatives (Sigmoid, TanH, ReLU, Leaky ReLU,
+  PReLU, ELU) used by the neural network models
 - Numeric CSV dataset loader
 - Reproducible training/test splitting
 - Regression and classification CSV output writers

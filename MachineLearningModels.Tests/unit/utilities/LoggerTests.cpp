@@ -35,3 +35,12 @@ TEST(LoggerTest, LogMethod) {
     EXPECT_NE(output.find("ERROR"), std::string::npos);
     EXPECT_NE(output.find("Error occurred"), std::string::npos);
 }
+
+TEST(LoggerTest, InstanceReturnsSameSharedLogger) {
+    // instance() must hand back one program-wide object, not a fresh
+    // Logger (or one scoped to a particular caller) on every call.
+    Logger& first = Logger::instance();
+    Logger& second = Logger::instance();
+
+    EXPECT_EQ(&first, &second);
+}

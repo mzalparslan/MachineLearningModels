@@ -37,6 +37,11 @@ Logger::Logger(
     output(&output) {
 }
 
+Logger& Logger::instance() {
+    static Logger shared;
+    return shared;
+}
+
 Logger::LogEntry Logger::debug() {
     return LogEntry(*this, LogLevel::Debug);
 }
