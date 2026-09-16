@@ -16,6 +16,35 @@ Repository contains four projects:
 
 ## Features
 
+### Models and Pipelines
+
+- Multiple linear regression
+- Logistic binary classification
+- BasicNeuralNetwork — a two-layer (one hidden layer) sigmoid network
+- DeepNeuralNetwork — a feedforward sigmoid network with an arbitrary
+  number of layers, trained by per-sample backpropagation
+- Regression pipeline combining a scaler, optimizer, and model
+- Binary-classification pipeline combining a scaler, optimizer, and model
+
+### Optimization
+
+- Batch gradient descent
+- Mini-batch gradient descent
+- Stochastic gradient descent
+- Configurable learning rate, epoch count, L2 regularization, and bias regularization
+
+### Feature Scaling
+
+- Min-max scaling
+- Mean normalization
+- Z-score standardization
+- Maximum absolute scaling
+- Robust scaling using the median and interquartile range
+- No-scaling policy
+
+Scaling parameters are fitted only on training data. The fitted parameters are
+then reused to transform prediction and test data, preventing data leakage.
+
 ### Execution Strategies
 
 Linear-output calculations support configurable standard-library execution modes:
@@ -31,35 +60,6 @@ execution is generally preferable for ordinary feature vectors, while parallel
 execution may benefit unusually large vectors. Actual performance depends on
 the processor, compiler, and standard-library implementation.
 
-### Feature Scaling
-
-- Min-max scaling
-- Mean normalization
-- Z-score standardization
-- Maximum absolute scaling
-- Robust scaling using the median and interquartile range
-- No-scaling policy
-
-Scaling parameters are fitted only on training data. The fitted parameters are
-then reused to transform prediction and test data, preventing data leakage.
-
-### Optimization
-
-- Batch gradient descent
-- Mini-batch gradient descent
-- Stochastic gradient descent
-- Configurable learning rate, epoch count, L2 regularization, and bias regularization
-
-### Models and Pipelines
-
-- Multiple linear regression
-- Logistic binary classification
-- BasicNeuralNetwork — a two-layer (one hidden layer) sigmoid network
-- DeepNeuralNetwork — a feedforward sigmoid network with an arbitrary
-  number of layers, trained by per-sample backpropagation
-- Regression pipeline combining a scaler, optimizer, and model
-- Binary-classification pipeline combining a scaler, optimizer, and model
-
 ### Supporting Components
 
 - Activation functions and derivatives (Sigmoid, TanH, ReLU, Leaky ReLU,
@@ -71,7 +71,7 @@ then reused to transform prediction and test data, preventing data leakage.
 - Benchmark and scope-based benchmark timers
 - Unit tests for the main components
 
-## Performance benchmarks
+## Performance Benchmarks
 
 `MachineLearningModels.Benchmarks` compares the available linear-output
 execution strategies across different feature-vector sizes.
