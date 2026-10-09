@@ -58,6 +58,9 @@ test_detail.xml
 binaryOutput.csv
 linearOutput.csv
 
+# Large downloaded datasets (too big for git; see README)
+/resources/external/
+
 # Log and temporary files
 *.log
 *.tmp
