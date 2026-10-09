@@ -202,6 +202,13 @@ copy /Y "$(SolutionDir)resources\*.csv" "$(ProjectDir)"</Command>
   <ItemGroup>
     <ClCompile Include="src\MachineLearningModels.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\experiments\BinaryEvaluation.h" />
+    <ClInclude Include="src\experiments\BreastCancerExperiment.h" />
+    <ClInclude Include="src\experiments\CreditCardFraudExperiment.h" />
+    <ClInclude Include="src\experiments\CrossValidation.h" />
+    <ClInclude Include="src\experiments\XorExperiment.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -9,7 +9,8 @@ evaluation output, and automated testing.
 Repository contains four projects:
 
 - **MachineLearningModels** — reusable static library.
-- **MachineLearningModels.Examples** — example regression and classification runs.
+- **MachineLearningModels.Examples** — example regression, classification, and
+  neural-network experiments (in `src/experiments/`).
 - **MachineLearningModels.Tests** — Google Test unit-test project.
 - **MachineLearningModels.Benchmarks** — performance comparisons of parallel and/or sequential execution strategies.
 
@@ -65,11 +66,76 @@ the processor, compiler, and standard-library implementation.
 - Activation functions and derivatives (Sigmoid, TanH, ReLU, Leaky ReLU,
   PReLU, ELU) used by the neural network models
 - Numeric CSV dataset loader
-- Reproducible training/test splitting
+- Reproducible training/test splitting, including stratified splits and
+  stratified k-fold cross-validation folds
 - Regression and classification CSV output writers
 - Stream-style logger with configurable severity levels
 - Benchmark and scope-based benchmark timers
 - Unit tests for the main components
+
+## Example datasets
+
+The examples run on these datasets, in `resources/`:
+
+- `classification.csv` and `lineardata.csv` — synthetic datasets for the
+  pipelines.
+- `breast_cancer.csv` — Breast Cancer Wisconsin (Diagnostic) from UCI,
+  569 samples and 30 features. Used for a stratified 5-fold comparison of
+  logistic regression and both neural networks.
+- `external/creditcard.csv` — optional, **not stored in git** (150 MB).
+  The ULB credit card fraud dataset: 284,807 transactions, 492 frauds. If
+  the file is missing, that experiment logs a warning and is skipped.
+
+To download the fraud dataset (a public copy of the Kaggle data), run from
+the repository root:
+
+```bash
+mkdir -p resources/external
+curl -L -o resources/external/creditcard.csv https://storage.googleapis.com/download.tensorflow.org/data/creditcard.csv
+sed -i 's/"//g' resources/external/creditcard.csv
+```
+
+The `sed` step removes the quotes around the `Class` column, which
+`CsvDataLoader` does not support. On Windows, run these in Git Bash or WSL.
+
+## Example results
+
+Both experiments use stratified 5-fold cross-validation (seed 42), fit a
+Z-score scaler on each fold's training part only, and classify at a 0.5
+threshold. Values are mean ± standard deviation across the five folds,
+measured on one machine in a Release build; timings will vary.
+
+### Breast Cancer Wisconsin (569 samples, 30 features)
+
+| Model | Accuracy | Precision | Recall | F1 | Cross-entropy |
+|---|---|---|---|---|---|
+| `LogisticBinaryClassifier` (batch GD, 1000 epochs) | 0.968 ± 0.021 | 0.975 ± 0.018 | 0.938 ± 0.049 | 0.956 ± 0.030 | 0.078 ± 0.039 |
+| `BasicNeuralNetwork` (8 hidden units, 200 epochs) | 0.974 ± 0.021 | 0.967 ± 0.027 | 0.962 ± 0.036 | 0.964 ± 0.028 | 0.112 ± 0.092 |
+| `DeepNeuralNetwork` (30-16-8-1, 200 epochs) | 0.975 ± 0.018 | 0.968 ± 0.034 | 0.967 ± 0.032 | 0.967 ± 0.024 | 0.123 ± 0.084 |
+
+The three models are effectively tied: accuracy and recall differ by less
+than the fold-to-fold spread. Logistic regression has the lowest
+cross-entropy, so the networks make similar decisions with more
+overconfident probabilities.
+
+### Credit card fraud (284,807 transactions, 492 frauds = 0.17%)
+
+An unweighted baseline: no class weighting or undersampling, `Time` column
+dropped (29 features), and a fixed 0.5 threshold. Accuracy is not reported,
+because always predicting "genuine" already scores 99.83%. All three models
+use per-sample updates with learning rate 0.05 and 20 epochs.
+
+| Model | Precision | Recall | F1 | Cross-entropy | Time (5 folds) |
+|---|---|---|---|---|---|
+| `LogisticBinaryClassifier` (SGD) | 0.865 ± 0.076 | 0.637 ± 0.281 | 0.684 ± 0.245 | 0.0098 ± 0.0015 | 6.6 s |
+| `BasicNeuralNetwork` (8 hidden units) | 0.879 ± 0.039 | 0.750 ± 0.033 | 0.808 ± 0.017 | 0.0031 ± 0.0007 | 8.8 s |
+| `DeepNeuralNetwork` (29-16-8-1) | 0.867 ± 0.081 | 0.733 ± 0.125 | 0.783 ± 0.056 | 0.0032 ± 0.0006 | 23 s |
+
+The networks reach about three times lower cross-entropy than logistic
+regression, a gap far larger than the fold-to-fold spread. Their higher F1
+is suggestive but not conclusive, because the logistic baseline is unstable
+across folds (recall ± 0.28). The two networks are tied within noise, and
+the deeper one is about 2.6 times slower.
 
 ## Performance Benchmarks
 

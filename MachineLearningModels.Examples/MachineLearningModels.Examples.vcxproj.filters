@@ -15,8 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="Header Files\experiments">
+      <UniqueIdentifier>{5d3c2a41-8e07-4b6f-9a12-7c4e1f0b8d93}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\MachineLearningModels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\experiments\BinaryEvaluation.h">
+      <Filter>Header Files\experiments</Filter>
+    </ClInclude>
+    <ClInclude Include="src\experiments\BreastCancerExperiment.h">
+      <Filter>Header Files\experiments</Filter>
+    </ClInclude>
+    <ClInclude Include="src\experiments\CreditCardFraudExperiment.h">
+      <Filter>Header Files\experiments</Filter>
+    </ClInclude>
+    <ClInclude Include="src\experiments\CrossValidation.h">
+      <Filter>Header Files\experiments</Filter>
+    </ClInclude>
+    <ClInclude Include="src\experiments\XorExperiment.h">
+      <Filter>Header Files\experiments</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

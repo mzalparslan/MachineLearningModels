@@ -83,3 +83,95 @@ TEST(DataSplitterTest, StratifiedSplitThrowsWhenAStratumIsTooSmall) {
 
     EXPECT_THROW(DataSplitter::stratifiedSplit(samples, 0.8), std::invalid_argument);
 }
+
+
+namespace {
+    // 90 majority (target 0) + 10 minority (target 1) samples, each with a
+    // unique feature value so individual samples can be tracked across folds.
+    std::vector<DataPoint<double>> makeImbalancedSamples() {
+        std::vector<DataPoint<double>> samples;
+        for (int i = 0; i < 100; ++i) {
+            samples.push_back(DataPoint<double>{
+                { static_cast<double>(i) }, i < 90 ? 0.0 : 1.0 });
+        }
+        return samples;
+    }
+}
+
+TEST(DataSplitterTest, StratifiedKFoldTestsEverySampleExactlyOnce) {
+    const auto samples = makeImbalancedSamples();
+    const auto folds = DataSplitter::stratifiedKFold(samples, 5, 42);
+
+    ASSERT_EQ(folds.size(), 5u);
+
+    std::vector<int> timesTested(samples.size(), 0);
+    for (const auto& fold : folds) {
+        EXPECT_EQ(fold.trainingData.size() + fold.testData.size(), samples.size());
+
+        for (const auto& point : fold.testData) {
+            ++timesTested[static_cast<std::size_t>(point.features[0])];
+        }
+    }
+
+    for (const int count : timesTested) {
+        EXPECT_EQ(count, 1);
+    }
+}
+
+TEST(DataSplitterTest, StratifiedKFoldKeepsTrainAndTestDisjoint) {
+    const auto samples = makeImbalancedSamples();
+    const auto folds = DataSplitter::stratifiedKFold(samples, 5, 42);
+
+    for (const auto& fold : folds) {
+        std::vector<bool> inTest(samples.size(), false);
+        for (const auto& point : fold.testData) {
+            inTest[static_cast<std::size_t>(point.features[0])] = true;
+        }
+
+        for (const auto& point : fold.trainingData) {
+            EXPECT_FALSE(inTest[static_cast<std::size_t>(point.features[0])]);
+        }
+    }
+}
+
+TEST(DataSplitterTest, StratifiedKFoldPreservesClassBalanceInEveryFold) {
+    const auto samples = makeImbalancedSamples();
+    const auto folds = DataSplitter::stratifiedKFold(samples, 5, 42);
+
+    const auto countClass = [](const std::vector<DataPoint<double>>& data, double target) {
+        return std::count_if(data.begin(), data.end(),
+            [target](const DataPoint<double>& point) { return point.target == target; });
+    };
+
+    // 90 / 5 = 18 majority and 10 / 5 = 2 minority samples per test fold.
+    for (const auto& fold : folds) {
+        EXPECT_EQ(countClass(fold.testData, 0.0), 18);
+        EXPECT_EQ(countClass(fold.testData, 1.0), 2);
+        EXPECT_EQ(countClass(fold.trainingData, 0.0), 72);
+        EXPECT_EQ(countClass(fold.trainingData, 1.0), 8);
+    }
+}
+
+TEST(DataSplitterTest, StratifiedKFoldReproducibleWithSeed) {
+    const auto samples = makeImbalancedSamples();
+
+    const auto folds1 = DataSplitter::stratifiedKFold(samples, 5, 7);
+    const auto folds2 = DataSplitter::stratifiedKFold(samples, 5, 7);
+
+    ASSERT_EQ(folds1.size(), folds2.size());
+    for (std::size_t f = 0; f < folds1.size(); ++f) {
+        ASSERT_EQ(folds1[f].testData.size(), folds2[f].testData.size());
+        for (std::size_t i = 0; i < folds1[f].testData.size(); ++i) {
+            EXPECT_DOUBLE_EQ(folds1[f].testData[i].features[0], folds2[f].testData[i].features[0]);
+        }
+    }
+}
+
+TEST(DataSplitterTest, StratifiedKFoldInvalidArgumentsThrow) {
+    const auto samples = makeImbalancedSamples();
+
+    EXPECT_THROW(DataSplitter::stratifiedKFold(samples, 1), std::invalid_argument);
+    EXPECT_THROW(DataSplitter::stratifiedKFold(std::vector<DataPoint<double>>{}, 5), std::invalid_argument);
+    // Only 10 minority samples, so 11 folds can't give each fold one.
+    EXPECT_THROW(DataSplitter::stratifiedKFold(samples, 11), std::invalid_argument);
+}

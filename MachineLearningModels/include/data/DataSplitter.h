@@ -182,4 +182,92 @@ public:
 
 		return dataset;
 	}
+
+	/**
+	 * @brief Splits samples into k stratified folds for cross-validation.
+	 *
+	 * Each distinct target value is shuffled and dealt round-robin across
+	 * the folds, so every fold keeps approximately the full dataset's
+	 * class balance and fold sizes differ by at most one sample per class.
+	 *
+	 * Element i of the result uses fold i as its test set and the
+	 * remaining k - 1 folds as its training set, so every sample is
+	 * tested exactly once across the k datasets.
+	 *
+	 * @tparam T Floating-point data mode.
+	 * @param samples Samples to partition. Not modified.
+	 * @param folds Number of folds (k). Must be at least 2.
+	 * @param randomSeed Seed used by random-number generator.
+	 *
+	 * @return k datasets, one per fold.
+	 *
+	 * @throws std::invalid_argument If samples is empty, folds is less
+	 * than 2, or any target value has fewer samples than folds.
+	 */
+	template <typename T>
+	[[nodiscard]]
+	static std::vector<Dataset<T>> stratifiedKFold(
+		const std::vector<DataPoint<T>>& samples,
+		std::size_t folds = 5,
+		std::uint32_t randomSeed = 42) {
+
+		if (folds < 2) {
+			throw std::invalid_argument(
+				"DataSplitter::stratifiedKFold: Fold count must be at least 2!");
+		}
+
+		if (true == samples.empty()) {
+			throw std::invalid_argument(
+				"DataSplitter::stratifiedKFold: Samples vector is empty!");
+		}
+
+		// Group sample indices by target value; one stratum per distinct value.
+		std::map<T, std::vector<std::size_t>> strata;
+		for (std::size_t i = 0; i < samples.size(); i++) {
+			strata[samples[i].target].push_back(i);
+		}
+
+		std::mt19937 randomGenerator(randomSeed);
+
+		// Deal each shuffled stratum round-robin across folds. The fold
+		// counter carries over between strata so remainders are spread
+		// across different folds rather than always landing in fold 0.
+		std::vector<std::size_t> foldOfSample(samples.size(), 0);
+		std::size_t nextFold = 0;
+		for (auto& [target, indices] : strata) {
+			if (indices.size() < folds) {
+				throw std::invalid_argument(
+					"DataSplitter::stratifiedKFold: "
+					"A target value has fewer samples than folds!");
+			}
+
+			std::shuffle(indices.begin(), indices.end(), randomGenerator);
+
+			for (const std::size_t index : indices) {
+				foldOfSample[index] = nextFold;
+				nextFold = (nextFold + 1) % folds;
+			}
+		}
+
+		std::vector<Dataset<T>> result(folds);
+		for (std::size_t fold = 0; fold < folds; fold++) {
+			for (std::size_t i = 0; i < samples.size(); i++) {
+				if (fold == foldOfSample[i]) {
+					result[fold].testData.push_back(samples[i]);
+				}
+				else {
+					result[fold].trainingData.push_back(samples[i]);
+				}
+			}
+
+			// Shuffle so order-sensitive learners (per-sample SGD) don't
+			// depend on the input ordering.
+			std::shuffle(result[fold].trainingData.begin(),
+				result[fold].trainingData.end(), randomGenerator);
+			std::shuffle(result[fold].testData.begin(),
+				result[fold].testData.end(), randomGenerator);
+		}
+
+		return result;
+	}
 };
